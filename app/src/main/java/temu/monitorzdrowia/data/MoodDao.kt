@@ -1,4 +1,4 @@
-package temu.monitorzdrowia
+package temu.monitorzdrowia.data
 
 import androidx.room.Dao
 import androidx.room.Delete
