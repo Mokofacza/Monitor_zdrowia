@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data
+package temu.monitorzdrowia
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

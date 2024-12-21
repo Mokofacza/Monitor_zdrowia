@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data
+package temu.monitorzdrowia
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,16 +42,35 @@ class MoodViewModel(
                 }
             }
 
-            MoodEvent.SaveRating -> TODO()
+            MoodEvent.SaveRating -> {
+                val note = state.value.note
+                val moodRating = state.value.moodRating
+                if(note.isBlank() || moodRating == null ){
+                    return
+                }
+                val mood = Mood(
+                    note = note,
+                    moodRating = moodRating
+                )
+                viewModelScope.launch {
+                    dao.insertMood(mood)
+                }
+                _state.update { it.copy(
+                    isAddingMood = false,
+                    moodRating = 0,
+                    note = ""
+                ) }
+            }
             is MoodEvent.SetNote -> {
                 _state.update { it.copy(
                     note = event.note
                 ) }
             }
-            is MoodEvent.SetRating ->
+            is MoodEvent.SetRating -> {
                 _state.update { it.copy(
                     moodRating = event.moodRating
                 ) }
+            }
             MoodEvent.ShowDialog -> {
                 _state.update { it.copy(
                     isAddingMood = true
@@ -59,11 +78,7 @@ class MoodViewModel(
             }
 
             is MoodEvent.SortContacts -> {
-                val note = state.value.note
-                val moodRating = state.value.moodRating
-                if(note.isBlank() || moodRating == null ){
-                    return
-                }
+                _sortType.value = event.sortType
             }
         }
     }

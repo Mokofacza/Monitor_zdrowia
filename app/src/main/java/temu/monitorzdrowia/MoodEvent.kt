@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data
+package temu.monitorzdrowia
 
 sealed interface MoodEvent {
     object SaveRating: MoodEvent

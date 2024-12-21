@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data
+package temu.monitorzdrowia
 
 enum class SortType {
     TIME,

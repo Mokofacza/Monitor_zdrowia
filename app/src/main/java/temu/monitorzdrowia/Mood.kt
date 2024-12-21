@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data
+package temu.monitorzdrowia
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -10,5 +10,5 @@ data class Mood(
     val note: String,
     val timestamp: LocalDateTime = LocalDateTime.now(),
     @PrimaryKey(autoGenerate = true)
-    val id: Int
+    val id: Int = 0
 )
