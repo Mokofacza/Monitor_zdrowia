@@ -17,4 +17,9 @@ interface MoodDao {
 
     @Query("SELECT * FROM Mood ORDER BY timestamp DESC") // sortowanie po dacie od góry
     fun orderByDateAndTime(): Flow<List<Mood>>
+
+    @Query("SELECT * FROM Mood ORDER BY MoodRating DESC") // Sortowanie malejąco
+    fun orderByRating(): Flow<List<Mood>>
+
+
 }
