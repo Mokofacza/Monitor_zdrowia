@@ -22,7 +22,8 @@ fun MoodScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ){
-
+//https://www.youtube.com/watch?v=bOd3wO0uFr8&t=1026s&ab_channel=PhilippLackner
+ // 32:00
         }
     }
 }
