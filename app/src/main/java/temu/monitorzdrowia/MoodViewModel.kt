@@ -45,19 +45,19 @@ class MoodViewModel(
             MoodEvent.SaveRating -> {
                 val note = state.value.note
                 val moodRating = state.value.moodRating
-                if(note.isBlank() || moodRating <= 0 ){
+                if (note.isBlank() || moodRating < 1) {
                     return
                 }
                 val mood = Mood(
                     note = note,
-                    moodRating = moodRating
+                    moodRating = moodRating,
                 )
                 viewModelScope.launch {
                     dao.insertMood(mood)
                 }
                 _state.update { it.copy(
                     isAddingMood = false,
-                    moodRating = 0,
+                    moodRating = 5,
                     note = ""
                 ) }
             }

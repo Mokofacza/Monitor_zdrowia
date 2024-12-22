@@ -1,4 +1,3 @@
-// MoodScreen.kt
 package temu.monitorzdrowia
 
 import androidx.compose.foundation.clickable
@@ -28,7 +27,6 @@ fun MoodScreen(
     state: MoodState,
     onEvent: (MoodEvent) -> Unit
 ) {
-    // Definicja formattera
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
 
     Scaffold(
