@@ -1,4 +1,4 @@
-package temu.monitorzdrowia
+package temu.monitorzdrowia.ui.build
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import temu.monitorzdrowia.SortType
 import java.time.format.DateTimeFormatter
 
 @Composable

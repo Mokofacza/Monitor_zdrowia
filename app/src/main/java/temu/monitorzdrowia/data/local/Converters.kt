@@ -1,4 +1,4 @@
-package temu.monitorzdrowia
+package temu.monitorzdrowia.data.local
 
 import androidx.room.TypeConverter
 import java.time.LocalDateTime

@@ -98,8 +98,8 @@ dependencies {
     implementation("androidx.compose.ui:ui")
 
     // Android Studio Preview support
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // UI Tests
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")

@@ -1,4 +1,7 @@
-package temu.monitorzdrowia
+package temu.monitorzdrowia.ui.build
+
+import temu.monitorzdrowia.SortType
+import temu.monitorzdrowia.data.models.Mood
 
 // Definiuje stan UI dla zarządzania nastrojami w aplikacji.
 

@@ -1,4 +1,4 @@
-package temu.monitorzdrowia
+package temu.monitorzdrowia.ui.build
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
