@@ -7,6 +7,6 @@ sealed interface MoodEvent {
     object ShowDialog: MoodEvent
     object HideDialog: MoodEvent
     data class DeleteMood(val mood: Mood): MoodEvent
-    data class SortContacts(val sortType: SortType): MoodEvent
+    data class SortMood(val sortType: SortType): MoodEvent
 
 }

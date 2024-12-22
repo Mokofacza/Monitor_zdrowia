@@ -45,7 +45,7 @@ class MoodViewModel(
             MoodEvent.SaveRating -> {
                 val note = state.value.note
                 val moodRating = state.value.moodRating
-                if(note.isBlank() || moodRating == null ){
+                if(note.isBlank() || moodRating <= 0 ){
                     return
                 }
                 val mood = Mood(
@@ -77,7 +77,7 @@ class MoodViewModel(
                 ) }
             }
 
-            is MoodEvent.SortContacts -> {
+            is MoodEvent.SortMood -> {
                 _sortType.value = event.sortType
             }
         }

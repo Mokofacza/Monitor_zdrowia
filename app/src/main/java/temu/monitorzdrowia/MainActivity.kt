@@ -1,20 +1,45 @@
+// MainActivity.kt
 package temu.monitorzdrowia
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.room.Room
+import temu.monitorzdrowia.ui.theme.MonitorZdrowiaTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            MoodDatabase::class.java,
+            "mood.db"
+        ).build()
+    }
+
+    private val viewModel: MoodViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(MoodViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return MoodViewModel(db.dao) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        setContent {
+            MonitorZdrowiaTheme {
+                val state by viewModel.state.collectAsState()
+                MoodScreen(state = state, onEvent = viewModel::onEvent)
+            }
         }
     }
 }

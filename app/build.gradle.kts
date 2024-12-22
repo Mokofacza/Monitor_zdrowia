@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -80,6 +81,7 @@ dependencies {
     // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$room_version")
 
+
     val composeBom = platform("androidx.compose:compose-bom:2024.10.01")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -120,4 +122,6 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata")
     // Optional - Integration with RxJava
     implementation("androidx.compose.runtime:runtime-rxjava2")
+
+ 
 }
