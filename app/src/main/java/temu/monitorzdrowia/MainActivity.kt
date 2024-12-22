@@ -1,4 +1,3 @@
-// MainActivity.kt
 package temu.monitorzdrowia
 
 import android.os.Bundle
@@ -13,20 +12,23 @@ import androidx.room.Room
 import temu.monitorzdrowia.ui.theme.MonitorZdrowiaTheme
 
 class MainActivity : ComponentActivity() {
+
+    // Inicjalizacja bazy danych Room jako lazy, aby była utworzona tylko wtedy, gdy jest potrzebna
     private val db by lazy {
         Room.databaseBuilder(
             applicationContext,
-            MoodDatabase::class.java,
-            "mood.db"
+            MoodDatabase::class.java, // Klasa bazy danych Room
+            "mood.db" // Nazwa pliku bazy danych
         ).build()
     }
 
+    // Inicjalizacja ViewModel za pomocą fabryki, aby przekazać DAO do ViewModelu
     private val viewModel: MoodViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(MoodViewModel::class.java)) {
                     @Suppress("UNCHECKED_CAST")
-                    return MoodViewModel(db.dao) as T
+                    return MoodViewModel(db.dao) as T // Przekazanie DAO do ViewModelu
                 }
                 throw IllegalArgumentException("Unknown ViewModel class")
             }
@@ -36,8 +38,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            // Ustawienie motywu aplikacji
             MonitorZdrowiaTheme {
+                // Obserwowanie stanu ViewModelu jako State w Compose
                 val state by viewModel.state.collectAsState()
+                // Wyświetlenie głównego ekranu aplikacji z przekazaniem stanu i funkcji obsługi zdarzeń
                 MoodScreen(state = state, onEvent = viewModel::onEvent)
             }
         }

@@ -24,23 +24,23 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun MoodScreen(
-    state: MoodState,
-    onEvent: (MoodEvent) -> Unit
+    state: MoodState, // Aktualny stan UI
+    onEvent: (MoodEvent) -> Unit // Funkcja do obsługi zdarzeń
 ) {
-    val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+    val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm") // Formatter do daty
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                onEvent(MoodEvent.ShowDialog)
+                onEvent(MoodEvent.ShowDialog) // Pokazuje dialog dodawania nastroju
             }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Dodaj")
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Dodaj") // Ikona dodawania
             }
         },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp) // Padding wokół Scaffold
     ) { padding ->
         if (state.isAddingMood) {
-            AddMoodDialog(state = state, onEvent = onEvent)
+            AddMoodDialog(state = state, onEvent = onEvent) // Wyświetla dialog, jeśli jest aktywny
         }
         LazyColumn(
             contentPadding = padding,
@@ -51,24 +51,24 @@ fun MoodScreen(
                 Row(
                     modifier = Modifier
                         .fillParentMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
+                        .horizontalScroll(rememberScrollState()), // Scrollowanie poziome
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SortType.values().forEach { sortType ->
                         Row(
                             modifier = Modifier
                                 .clickable {
-                                    onEvent(MoodEvent.SortMood(sortType))
+                                    onEvent(MoodEvent.SortMood(sortType)) // Zmiana typu sortowania
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             RadioButton(
-                                selected = state.sortType == sortType,
+                                selected = state.sortType == sortType, // Zaznaczenie aktualnego sortowania
                                 onClick = {
-                                    onEvent(MoodEvent.SortMood(sortType))
+                                    onEvent(MoodEvent.SortMood(sortType)) // Zmiana sortowania
                                 }
                             )
-                            Text(text = sortType.name)
+                            Text(text = sortType.name) // Nazwa typu sortowania
                         }
                     }
                 }
@@ -77,7 +77,7 @@ fun MoodScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 8.dp), // Padding pionowy
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -85,7 +85,7 @@ fun MoodScreen(
                             text = "Ocena: ${mood.moodRating}",
                             fontSize = 20.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(4.dp)) // Spacer między elementami
                         Text(
                             text = "Opis: ${mood.note}",
                             fontSize = 16.sp
@@ -97,9 +97,9 @@ fun MoodScreen(
                         )
                     }
                     IconButton(onClick = {
-                        onEvent(MoodEvent.DeleteMood(mood))
+                        onEvent(MoodEvent.DeleteMood(mood)) // Usuwanie nastroju
                     }) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Usuń")
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Usuń") // Ikona usuwania
                     }
                 }
             }
