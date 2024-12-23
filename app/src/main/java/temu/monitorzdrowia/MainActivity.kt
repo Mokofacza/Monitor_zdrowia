@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,7 +18,6 @@ import temu.monitorzdrowia.data.local.MoodDatabase
 import temu.monitorzdrowia.navigation.AppNavGraph
 import temu.monitorzdrowia.ui.components.TopBar
 import temu.monitorzdrowia.ui.build.AddMoodDialog
-import temu.monitorzdrowia.ui.build.MoodEvent
 import temu.monitorzdrowia.ui.build.MoodViewModel
 import temu.monitorzdrowia.ui.theme.MonitorZdrowiaTheme
 
@@ -54,13 +51,6 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     topBar = { TopBar(navController = navController) },
-                    floatingActionButton = {
-                        FloatingActionButton(onClick = {
-                            viewModel.onEvent(MoodEvent.ShowDialog)
-                        }) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Dodaj")
-                        }
-                    },
                     content = { padding ->
                         Box(modifier = Modifier.padding(padding)) {
                             AppNavGraph(navController = navController, viewModel = viewModel)
