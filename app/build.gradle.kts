@@ -123,5 +123,9 @@ dependencies {
     // Optional - Integration with RxJava
     implementation("androidx.compose.runtime:runtime-rxjava2")
 
+    val nav_version = "2.8.5"
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+
  
 }
