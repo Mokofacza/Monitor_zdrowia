@@ -26,6 +26,8 @@ class MoodViewModel(
             when (sortType) {
                 SortType.TIME -> dao.orderByDateAndTime()
                 SortType.RATING -> dao.orderByRating()
+                SortType.TIME1 -> dao.orderByDateAndTime()
+                SortType.RATING1 -> dao.orderByRating()
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
