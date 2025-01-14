@@ -46,7 +46,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
         setContent {
@@ -60,7 +59,7 @@ class MainActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .padding(padding)
-                                .systemBarsPadding() // Uwzględnienie pasków systemowych
+                                .systemBarsPadding()
                         ) {
                             AppNavGraph(navController = navController, viewModel = viewModel)
                             if (state.isAddingMood) {

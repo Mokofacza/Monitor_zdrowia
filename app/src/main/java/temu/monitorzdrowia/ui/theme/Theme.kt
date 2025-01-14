@@ -1,4 +1,3 @@
-// temu/monitorzdrowia/ui/theme/Theme.kt
 package temu.monitorzdrowia.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -8,17 +7,14 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Upewnij się, że kolory z Color.kt są zaimportowane
-// import temu.monitorzdrowia.ui.theme.*
-
 private val DarkColorScheme = darkColorScheme(
-    primary = Navy,
+    primary = Navy, //Topbar -- nie zmieniać
     onPrimary = White,
-    primaryContainer = Puple,
+    primaryContainer = Navy, // guzik dodawania  -- nie zmieniać
     onPrimaryContainer = White,
-    secondary = KijWie,
+    secondary = Puple,
     onSecondary = Black,
-    secondaryContainer = KijWie, // lub inny odpowiedni kolor
+    secondaryContainer = Puple, //od okienek z zapisanymi moodami  -- nie zmieniać
     onSecondaryContainer = White,
     background = Black,
     onBackground = White,
@@ -29,13 +25,13 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple500,
+    primary = Purple500, //Topbar -- nie zmieniać
     onPrimary = White,
-    primaryContainer = Purple700,
+    primaryContainer = Purple500, // guzik dodawania  -- nie zmieniać
     onPrimaryContainer = White,
     secondary = Teal200,
     onSecondary = Black,
-    secondaryContainer = Teal200, // dostosuj według potrzeb
+    secondaryContainer = Purple200, //od okienek z zapisanymi moodami  -- nie zmieniać
     onSecondaryContainer = White,
     background = White,
     onBackground = Black,
