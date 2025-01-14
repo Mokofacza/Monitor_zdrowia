@@ -127,5 +127,7 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
- 
+
+
+
 }
