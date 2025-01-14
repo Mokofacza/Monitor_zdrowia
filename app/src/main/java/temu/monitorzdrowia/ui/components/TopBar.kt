@@ -1,4 +1,3 @@
-// TopBar.kt
 package temu.monitorzdrowia.ui.components
 
 import androidx.compose.material3.*
@@ -10,7 +9,6 @@ import temu.monitorzdrowia.navigation.NavRoutes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +24,6 @@ fun TopBar(navController: NavController) {
             IconButton(
                 onClick = {
                     navController.navigate(NavRoutes.Mood.route) {
-                        // Unikaj duplikowania trasy w back stack
                         launchSingleTop = true
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
@@ -38,7 +35,12 @@ fun TopBar(navController: NavController) {
                 Icon(
                     imageVector = Icons.Filled.Home,
                     contentDescription = "Mood",
-                    tint = if (currentRoute == NavRoutes.Mood.route) MaterialTheme.colorScheme.onPrimary else Color.Gray
+                    tint = if (currentRoute == NavRoutes.Mood.route) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        // Używamy koloru z motywu z obniżoną przezroczystością dla nieaktywnej ikony
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                    }
                 )
             }
 
@@ -46,7 +48,6 @@ fun TopBar(navController: NavController) {
             IconButton(
                 onClick = {
                     navController.navigate(NavRoutes.Profile.route) {
-                        // Unikaj duplikowania trasy w back stack
                         launchSingleTop = true
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
@@ -58,7 +59,11 @@ fun TopBar(navController: NavController) {
                 Icon(
                     imageVector = Icons.Filled.AccountCircle,
                     contentDescription = "Profile",
-                    tint = if (currentRoute == NavRoutes.Profile.route) MaterialTheme.colorScheme.onPrimary else Color.Gray
+                    tint = if (currentRoute == NavRoutes.Profile.route) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
+                    }
                 )
             }
         },

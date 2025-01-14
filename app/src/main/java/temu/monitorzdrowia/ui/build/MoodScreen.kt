@@ -43,7 +43,7 @@ fun MoodScreen(
             item {
                 Row(
                     modifier = Modifier
-                        .fillParentMaxWidth()
+                        .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
