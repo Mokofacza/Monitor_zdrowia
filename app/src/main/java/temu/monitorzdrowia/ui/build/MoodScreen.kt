@@ -37,10 +37,9 @@ fun MoodScreen(
                         .fillMaxWidth()
                         .height(56.dp)
                         .horizontalScroll(rememberScrollState())
-                        .padding(horizontal = 8.dp),
+                        .padding(horizontal = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Poszczególne przyciski – nie stosujemy Arrangement.SpaceEvenly,
                     // aby w razie nadmiaru elementów pojawiło się przewijanie poziome.
                     Button(
                         onClick = { onEvent(MoodEvent.SortMood(SortType.RATING)) }
