@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     alias(libs.plugins.compose.compiler)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -126,7 +127,6 @@ dependencies {
     val nav_version = "2.8.5"
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
-
 
 
 
