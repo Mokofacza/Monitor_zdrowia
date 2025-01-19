@@ -30,7 +30,7 @@ fun MoodScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shadowElevation = 4.dp,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.secondary
             ) {
                 Row(
                     modifier = Modifier
@@ -44,25 +44,25 @@ fun MoodScreen(
                     Button(
                         onClick = { onEvent(MoodEvent.SortMood(SortType.RATING)) }
                     ) {
-                        Text(text = "Ocena od góry")
+                        Text(text = "Od najlepszych")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { onEvent(MoodEvent.SortMood(SortType.RATING1)) }
                     ) {
-                        Text(text = "Ocena od dołu")
+                        Text(text = "Od najgorszych")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { onEvent(MoodEvent.SortMood(SortType.TIME)) }
                     ) {
-                        Text(text = "Data - najnowsze")
+                        Text(text = "Od najnowszych")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = { onEvent(MoodEvent.SortMood(SortType.TIME1)) }
                     ) {
-                        Text(text = "Data - najstarsze")
+                        Text(text = "Od najstarszych")
                     }
                 }
             }
@@ -121,7 +121,7 @@ fun MoodScreen(
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
                                     contentDescription = "Usuń",
-                                    tint = MaterialTheme.colorScheme.error
+                                    tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
                         }

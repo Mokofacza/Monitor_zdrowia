@@ -8,36 +8,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Navy, //Topbar -- nie zmieniać
+    primary = Dgreen1, //Topbar -- nie zmieniać
     onPrimary = White,
-    primaryContainer = Navy, // guzik dodawania  -- nie zmieniać
+    primaryContainer = Dgreen1, // guzik dodawania  -- nie zmieniać
     onPrimaryContainer = White,
-    secondary = Puple,
+    secondary = Dgreen2, //tło paska do sortowania
     onSecondary = Black,
-    secondaryContainer = Puple, //od okienek z zapisanymi moodami  -- nie zmieniać
+    secondaryContainer = Dgrey, //od okienek z zapisanymi moodami  -- nie zmieniać
     onSecondaryContainer = White,
     background = Black,
     onBackground = White,
     surface = Black,
     onSurface = White,
-    error = Color(0xFFB00020),
-    onError = White
+    error = Error,
+    onError = White,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple500, //Topbar -- nie zmieniać
+    primary = Green1, //Topbar -- nie zmieniać
     onPrimary = White,
-    primaryContainer = Purple500, // guzik dodawania  -- nie zmieniać
+    primaryContainer = Green1, // guzik dodawania  -- nie zmieniać
     onPrimaryContainer = White,
-    secondary = Teal200,
+    secondary = Green2, //tło paska do sortowania
     onSecondary = Black,
-    secondaryContainer = Purple200, //od okienek z zapisanymi moodami  -- nie zmieniać
+    secondaryContainer = Offwhite, //od okienek z zapisanymi moodami  -- nie zmieniać
     onSecondaryContainer = White,
     background = White,
-    onBackground = Black,
+    onBackground = White,
     surface = White,
     onSurface = Black,
-    error = Color(0xFFB00020),
+    error = Error,
     onError = White
 )
 
