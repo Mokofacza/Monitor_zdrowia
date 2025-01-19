@@ -14,16 +14,23 @@ interface MoodDao {
 
     @Insert
     suspend fun insertMood(mood: Mood)
-    // suspend umożliwia wykonywanie tej operacji w tle.
 
     @Delete
     suspend fun deleteMood(mood: Mood)
 
-    @Query("SELECT * FROM Mood ORDER BY timestamp DESC") // sortowanie po dacie od góry
-    fun orderByDateAndTime(): Flow<List<Mood>> // Zwraca Flow, co oznacza, że możemy obserwować zmiany w czasie rzeczywistym.
+    // Sortowanie po dacie od najnowszej do najstarszej (malejąco)
+    @Query("SELECT * FROM Mood ORDER BY timestamp DESC")
+    fun orderByDateDescending(): Flow<List<Mood>>
 
-    @Query("SELECT * FROM Mood ORDER BY MoodRating DESC") // Sortowanie malejąco
-    fun orderByRating(): Flow<List<Mood>>
+    // Sortowanie po dacie od najstarszej do najnowszej (rosnąco)
+    @Query("SELECT * FROM Mood ORDER BY timestamp ASC")
+    fun orderByDateAscending(): Flow<List<Mood>>
 
+    // Sortowanie po ocenie od najwyższej do najniższej (malejąco)
+    @Query("SELECT * FROM Mood ORDER BY MoodRating DESC")
+    fun orderByRatingDescending(): Flow<List<Mood>>
 
+    // Sortowanie po ocenie od najniższej do najwyższej (rosnąco)
+    @Query("SELECT * FROM Mood ORDER BY MoodRating ASC")
+    fun orderByRatingAscending(): Flow<List<Mood>>
 }
