@@ -22,6 +22,7 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = White,
     error = Error,
     onError = White,
+    tertiaryContainer = Dgrey1 // od zaznaczonego okienka
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -38,7 +39,8 @@ private val LightColorScheme = lightColorScheme(
     surface = White,
     onSurface = Black,
     error = Error,
-    onError = White
+    onError = White,
+    tertiaryContainer = Offwhite1 // od zaznaczonego okienka
 )
 
 @Composable
