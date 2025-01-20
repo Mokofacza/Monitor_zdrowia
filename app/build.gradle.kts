@@ -128,6 +128,9 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
+    // add the dependency for the Google AI client SDK for Android
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
 
 
 }
