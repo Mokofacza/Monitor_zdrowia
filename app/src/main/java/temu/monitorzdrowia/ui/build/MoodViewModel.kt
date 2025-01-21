@@ -24,8 +24,10 @@ class MoodViewModel(
     private val _mood = _sortType
         .flatMapLatest { sortType ->
             when (sortType) {
-                SortType.TIME -> dao.orderByDateAndTime()
-                SortType.RATING -> dao.orderByRating()
+                SortType.TIME -> dao.orderByDateDescending()
+                SortType.RATING -> dao.orderByRatingDescending()
+                SortType.TIME1 -> dao.orderByDateAscending()
+                SortType.RATING1 -> dao.orderByRatingAscending()
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
