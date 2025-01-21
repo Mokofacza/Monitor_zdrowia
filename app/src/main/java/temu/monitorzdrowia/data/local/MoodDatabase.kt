@@ -1,6 +1,5 @@
 package temu.monitorzdrowia.data.local
 
-import UserDao
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
