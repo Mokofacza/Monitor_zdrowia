@@ -12,10 +12,8 @@ import temu.monitorzdrowia.data.models.User
 @Database(
     entities = [Mood::class, User::class], // Poprawione dodanie klasy User jako drugiej tabeli
     version = 1,
-    exportSchema = true // Zalecane, aby zachować schemat bazy danych dla przyszłych migracji
 )
 @TypeConverters(Converters::class) // Informuje Room o niestandardowych konwerterach typów
 abstract class MoodDatabase : RoomDatabase() {
-    abstract val moodDao: MoodDao // Abstrakcyjna właściwość DAO dla Mood
-    abstract val userDao: UserDao // Abstrakcyjna właściwość DAO dla User
+    abstract val dao: MoodDao // Abstrakcyjna właściwość DAO dla Mood
 }

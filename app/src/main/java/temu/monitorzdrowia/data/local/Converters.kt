@@ -1,6 +1,7 @@
 package temu.monitorzdrowia.data.local
 
 import androidx.room.TypeConverter
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -23,5 +24,15 @@ object Converters {
         return dateTimeString?.let {
             LocalDateTime.parse(it, formatter) // Parsuje sformatowany String na LocalDateTime
         }
+    }
+
+    @TypeConverter
+    fun fromLocalDate(date: LocalDate?): String? {
+        return date?.toString()  // LocalDate zapisany jako "YYYY-MM-DD"
+    }
+
+    @TypeConverter
+    fun toLocalDate(dateString: String?): LocalDate? {
+        return dateString?.let { LocalDate.parse(it) }
     }
 }
