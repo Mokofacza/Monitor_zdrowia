@@ -1,15 +1,16 @@
 package temu.monitorzdrowia.ui.build
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,8 +25,10 @@ fun MoodScreen(
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
 
+    // Stan lokalny do śledzenia, która karta jest obecnie kliknieta
+    var expandedMoodId by remember { mutableStateOf<Int?>(null) }
+
     Scaffold(
-        // Pasek sortowania znajduje się w topBar, ma ustaloną wysokość i przewijanie poziome.
         topBar = {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
@@ -40,7 +43,6 @@ fun MoodScreen(
                         .padding(horizontal = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // aby w razie nadmiaru elementów pojawiło się przewijanie poziome.
                     Button(
                         onClick = { onEvent(MoodEvent.SortMood(SortType.RATING)) }
                     ) {
@@ -80,14 +82,25 @@ fun MoodScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Wyświetlanie listy nastrojów
                 items(state.mood) { mood ->
+                    // Sprawdzamy, czy dany element jest obecnie klikniety
+                    val isExpanded = expandedMoodId == mood.id
+
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp,horizontal = 16.dp),
+                            .padding(vertical = 8.dp, horizontal = 16.dp)
+                            // Kliknięcie w kartę będzie przełączało stan rozszerzenia
+                            .clickable {
+                                expandedMoodId = if (isExpanded) null else mood.id
+                            },
+                        // Jeżeli jest rozszerzona
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                            containerColor = if (isExpanded) {
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            }
                         )
                     ) {
                         Row(
@@ -103,8 +116,18 @@ fun MoodScreen(
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
+
+
+                                // wyświetlamy pierwsze 50 znaków
+                                val shortNote = if (mood.note.length > 50) {
+                                    mood.note.take(50) + "..."
+                                } else {
+                                    mood.note
+                                }
+                                val description = if (isExpanded) mood.note else shortNote
+
                                 Text(
-                                    text = "Opis: ${mood.note}",
+                                    text = "Opis: $description",
                                     fontSize = 16.sp,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer
                                 )
