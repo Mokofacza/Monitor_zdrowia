@@ -2,9 +2,11 @@ package temu.monitorzdrowia.ui.build
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import temu.monitorzdrowia.BuildConfig
 import temu.monitorzdrowia.SortType
 import temu.monitorzdrowia.data.local.MoodDao
 import temu.monitorzdrowia.data.models.Mood
@@ -16,7 +18,6 @@ class MoodViewModel(
 
     // Prywatny stan przechowujący bieżące dane UI
     private val _state = MutableStateFlow(MoodState())
-
     // Prywatny stan przechowujący aktualny typ sortowania
     private val _sortType = MutableStateFlow(SortType.TIME)
 
@@ -98,6 +99,45 @@ class MoodViewModel(
                 // Aktualizacja typu sortowania
                 _sortType.value = event.sortType
             }
+
+            // Poniższe zdarzenia dotyczą obsługi dialogu analizy nastroju:
+            MoodEvent.ShowAnalysisDialog -> {
+                _state.update { it.copy(isAnalyzingMood = true) }
+            }
+
+            MoodEvent.HideAnalysisDialog -> {
+                _state.update { it.copy(isAnalyzingMood = false) }
+            }
+
+            is MoodEvent.AnalyzeMood -> {
+                viewModelScope.launch {
+                    // Łączymy opisy z przekazanej listy Mood – każdy wpis oddzielony jest znakiem nowej linii
+                    val combinedDescriptions = event.moods.joinToString(separator = "\n") { it.note }
+
+                    // Tworzymy prompt zawierający opisy
+                    val prompt = "Przeanalizuj poniższe opisy nastroju, są one podane od najnowszych i daj mi radę." +
+                            " są to wpisy odnośnie nastroju pacjenta.chce byś odpowiedział w maksymalnie 10 zdaniach." +
+                            " wciel sie w role jego lekarza:\n$combinedDescriptions"
+
+                    // Wywołanie modelu generatywnego z utworzonym promptem
+                    val response = generativeModel.generateContent(prompt)
+
+                    // Możesz wypisać wynik do logów, aby zweryfikować odpowiedź
+                    print(response.text)
+
+                    // Aktualizujemy stan z wynikiem analizy – wynik pochodzi z wygenerowanego tekstu modelu
+                    _state.update { it.copy(analysisResult = response.text) }
+                }
+            }
+
+
         }
     }
+    val generativeModel = GenerativeModel(
+        // The Gemini 1.5 models are versatile and work with most use cases
+        modelName = "gemini-1.5-flash",
+        // Access your API key as a Build Configuration variable (see "Set up your API key" above)
+        apiKey = BuildConfig.apikey
+    )
+
 }

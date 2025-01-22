@@ -75,6 +75,11 @@ fun MoodScreen(
             }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Dodaj")
             }
+            Button(
+                onClick = { onEvent(MoodEvent.ShowAnalysisDialog) }
+            ) {
+                Text(text = "Analiza nastroju")
+            }
         },
         content = { padding ->
             LazyColumn(
@@ -157,4 +162,19 @@ fun MoodScreen(
     if (state.isAddingMood) {
         AddMoodDialog(state = state, onEvent = onEvent)
     }
+
+    // Dialog do analizy nastroju przy użyciu GeminI
+    if (state.isAnalyzingMood) {
+        GeminiDialog(
+            moodHistory = state.mood, // przekazujemy całą listę, suwak wybierze podzbiór
+            analysisResult = state.analysisResult,
+            onAnalyze = { selectedMoods ->
+                // Przekazujemy wybrane wpisy do logiki analizy.
+                // Implementację funkcji analizy możesz zrealizować według własnych potrzeb.
+                onEvent(MoodEvent.AnalyzeMood(selectedMoods))
+            },
+            onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) }
+        )
+    }
+
 }

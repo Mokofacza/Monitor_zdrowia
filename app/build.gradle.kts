@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,9 +9,18 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+    }
+    val apiKey = localProperties.getProperty("api.key") ?: ""
+
+
 android {
     namespace = "temu.monitorzdrowia"
     compileSdk = 35
+    buildFeatures.buildConfig = true
 
     defaultConfig {
         applicationId = "temu.monitorzdrowia"
@@ -21,8 +33,12 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
+        getByName("debug") {
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+        }
+        getByName("release") {
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
