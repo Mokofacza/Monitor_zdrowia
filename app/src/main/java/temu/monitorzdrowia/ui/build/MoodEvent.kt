@@ -11,7 +11,7 @@ sealed class MoodEvent {
     object HideDialog : MoodEvent()
     object ShowAnalysisDialog : MoodEvent()
     object HideAnalysisDialog : MoodEvent()
-    data class AnalyzeMood(val ratings: List<Int>) : MoodEvent()
+    data class AnalyzeMood(val moods: List<Mood>) : MoodEvent()
     data class SortMood(val sortType: SortType) : MoodEvent()
     data class DeleteMood(val mood: Mood) : MoodEvent()
     data class SetNote(val note: String) : MoodEvent()
