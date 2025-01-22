@@ -20,6 +20,7 @@ import temu.monitorzdrowia.navigation.AppNavGraph
 import temu.monitorzdrowia.ui.components.TopBar
 import temu.monitorzdrowia.ui.build.AddMoodDialog
 import temu.monitorzdrowia.ui.build.MoodViewModel
+import temu.monitorzdrowia.ui.build.ProfileViewModel
 import temu.monitorzdrowia.ui.theme.MonitorZdrowiaTheme
 
 @Suppress("DEPRECATION")
@@ -32,7 +33,8 @@ class MainActivity : ComponentActivity() {
         ).build()
     }
 
-    private val viewModel: MoodViewModel by viewModels {
+    // Już masz MoodViewModel:
+    private val moodViewModel: MoodViewModel by viewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 if (modelClass.isAssignableFrom(MoodViewModel::class.java)) {
@@ -44,13 +46,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Dodaj drugi ViewModel — ProfileViewModel
+    private val profileViewModel: ProfileViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    // Przekazujesz np. to samo db.dao, o ile jest tam metoda getUser() itd.
+                    return ProfileViewModel(db.dao) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             MonitorZdrowiaTheme {
                 val navController = rememberNavController()
-                val state by viewModel.state.collectAsState()
+                val state by moodViewModel.state.collectAsState()
 
                 Scaffold(
                     topBar = { TopBar(navController = navController) },
@@ -60,9 +75,18 @@ class MainActivity : ComponentActivity() {
                                 .padding(padding)
                                 .systemBarsPadding()
                         ) {
-                            AppNavGraph(navController = navController, viewModel = viewModel)
+                            // Teraz przekazujesz OBYDWA ViewModel-e
+                            AppNavGraph(
+                                navController = navController,
+                                viewModel = moodViewModel,
+                                profileViewModel = profileViewModel // <--
+                            )
+
                             if (state.isAddingMood) {
-                                AddMoodDialog(state = state, onEvent = viewModel::onEvent)
+                                AddMoodDialog(
+                                    state = state,
+                                    onEvent = moodViewModel::onEvent
+                                )
                             }
                         }
                     }
