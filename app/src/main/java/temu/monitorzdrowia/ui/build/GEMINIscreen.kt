@@ -6,30 +6,48 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import temu.monitorzdrowia.data.models.Mood
 
 /**
- * Dialog analizujący nastrój przy użyciu ostatnich ocen z historii.
+ * Dialog analizujący nastrój przy użyciu ostatnich wpisów (rating + opis).
  *
- * @param moodHistory Lista ostatnich ocen nastroju (np. 5–10 wartości).
+ * @param moodHistory Lista wpisów nastroju.
  * @param analysisResult (Opcjonalnie) Wynik analizy, który może być wyświetlony.
  * @param onAnalyze Funkcja uruchamiana po kliknięciu przycisku "Analizuj".
- *                  Przekazywana lista ocen zostanie wysłana do API.
+ *                  Wybrana lista wpisów zostanie przekazana do logiki analizy.
  * @param onDismiss Funkcja wywoływana przy zamknięciu dialogu.
  * @param modifier Opcjonalne modyfikatory.
  */
 @Composable
 fun GeminiDialog(
-    moodHistory: List<Int>,
+    moodHistory: List<Mood>,
     analysisResult: String? = null,
-    onAnalyze: (List<Int>) -> Unit,
+    onAnalyze: (List<Mood>) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Upewnij się, że mamy co najmniej jeden wpis do analizy.
+    val maxEntries = moodHistory.size.coerceAtLeast(1)
+    // Posortuj listę tak, aby najnowsze wpisy były na początku
+    val newestFirst = moodHistory.sortedByDescending { it.timestamp }
+
+    // Upewnij się, że suwak nie przekracza 5, nawet jeśli lista ma więcej wpisów
+    val sliderMax = newestFirst.size.coerceAtMost(5)
+
+    // Domyślnie wybieramy np. 3 wpisy lub liczbę wpisów, jeśli jest ich mniej
+    var selectedCount by remember { mutableStateOf(if (sliderMax >= 3) 3f else sliderMax.toFloat()) }
+
+    // Pobierz najnowsze wpisy na podstawie wybranej liczby
+    val selectedMoods = newestFirst.take(selectedCount.toInt())
+
+
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Analiza Nastroju") },
@@ -38,36 +56,44 @@ fun GeminiDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Wyświetlenie ostatnich ocen nastroju
+                // Suwak wyboru liczby wpisów do analizy
                 Text(
-                    text = "Ostatnie nastroje: ${moodHistory.joinToString(separator = ", ")}",
+                    text = "Liczba wpisów do analizy: ${selectedCount.toInt()}",
                     fontSize = 16.sp
                 )
+                val sliderMax = maxEntries.coerceAtMost(5)
+                Slider(
+                    value = selectedCount,
+                    onValueChange = { selectedCount = it },
+                    valueRange = 1f..sliderMax.toFloat(),
+                    steps = (maxEntries - 1).coerceAtLeast(0),
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
 
-                // Jeśli wynik analizy został już pobrany, wyświetl go
-                analysisResult?.let {
+                // Wyświetlenie krótkiego podglądu wybranych wpisów
+                selectedMoods.forEach { mood ->
                     Text(
-                        text = "Wynik analizy: $it",
+                        text = "Ocena: ${mood.moodRating} - Opis: ${
+                            if (mood.note.length > 50) mood.note.take(50) + "..." else mood.note
+                        }",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+
+                // Jeśli wynik analizy jest dostępny, go wyświetlamy.
+                analysisResult?.let { result ->
+                    Text(
+                        text = "Wynik analizy: $result",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
-
-                // Opcjonalnie – możesz dodać suwak do zmiany dodatkowego parametru analizy:
-                /*Slider(
-                    value = someValue,
-                    onValueChange = { newValue ->
-                        // Przykładowa zmiana jakiegoś parametru analizy
-                    },
-                    valueRange = 0f..100f,
-                    steps = 4,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )*/
             }
         },
         confirmButton = {
             Button(
-                onClick = { onAnalyze(moodHistory) }
+                onClick = { onAnalyze(selectedMoods) }
             ) {
                 Text(text = "Analizuj")
             }

@@ -165,15 +165,16 @@ fun MoodScreen(
 
     // Dialog do analizy nastroju przy użyciu GeminI
     if (state.isAnalyzingMood) {
-        // Pobieramy ostatnie 5 ocen nastroju; możesz zmodyfikować liczbę elementów
-        val moodRatings = state.mood.takeLast(5).map { it.moodRating }
         GeminiDialog(
-            moodHistory = moodRatings,
-            analysisResult = state.analysisResult, // Wynik analizy (jeśli już pobrany)
-            onAnalyze = { ratings ->
-                onEvent(MoodEvent.AnalyzeMood(ratings))
+            moodHistory = state.mood, // przekazujemy całą listę, suwak wybierze podzbiór
+            analysisResult = state.analysisResult,
+            onAnalyze = { selectedMoods ->
+                // Przekazujemy wybrane wpisy do logiki analizy.
+                // Implementację funkcji analizy możesz zrealizować według własnych potrzeb.
+                onEvent(MoodEvent.AnalyzeMood(selectedMoods))
             },
             onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) }
         )
     }
+
 }
