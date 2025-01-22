@@ -16,7 +16,6 @@ class MoodViewModel(
 
     // Prywatny stan przechowujący bieżące dane UI
     private val _state = MutableStateFlow(MoodState())
-
     // Prywatny stan przechowujący aktualny typ sortowania
     private val _sortType = MutableStateFlow(SortType.TIME)
 
@@ -98,6 +97,31 @@ class MoodViewModel(
                 // Aktualizacja typu sortowania
                 _sortType.value = event.sortType
             }
+
+            // Poniższe zdarzenia dotyczą obsługi dialogu analizy nastroju:
+            MoodEvent.ShowAnalysisDialog -> {
+                _state.update { it.copy(isAnalyzingMood = true) }
+            }
+
+            MoodEvent.HideAnalysisDialog -> {
+                _state.update { it.copy(isAnalyzingMood = false) }
+            }
+
+            is MoodEvent.AnalyzeMood -> {
+                // Wywołanie API (np. z generatywnym modelem), by przeprowadzić analizę nastroju na podstawie ocen
+                viewModelScope.launch {
+                    val result = analyzeMoodApi(event.ratings)
+                    _state.update { it.copy(analysisResult = result) }
+                }
+            }
         }
+    }
+
+    // Przykładowa funkcja wywołania API do analizy nastroju (należy dostosować do własnych potrzeb)
+    private suspend fun analyzeMoodApi(ratings: List<Int>): String {
+        // Możesz tu zintegrować swój model generatywny, np. używając GenerativeModel
+        // Dla przykładu zwracamy średnią ocen w formie sformatowanego stringa:
+        val average = ratings.average()
+        return "Średnia ocena nastroju: ${"%.2f".format(average)}"
     }
 }
