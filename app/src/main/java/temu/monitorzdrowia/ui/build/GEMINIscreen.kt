@@ -36,17 +36,13 @@ fun GeminiDialog(
     val maxEntries = moodHistory.size.coerceAtLeast(1)
     // Posortuj listę tak, aby najnowsze wpisy były na początku
     val newestFirst = moodHistory.sortedByDescending { it.timestamp }
-
     // Upewnij się, że suwak nie przekracza 5, nawet jeśli lista ma więcej wpisów
     val sliderMax = newestFirst.size.coerceAtMost(5)
 
     // Domyślnie wybieramy np. 3 wpisy lub liczbę wpisów, jeśli jest ich mniej
     var selectedCount by remember { mutableStateOf(if (sliderMax >= 3) 3f else sliderMax.toFloat()) }
-
     // Pobierz najnowsze wpisy na podstawie wybranej liczby
     val selectedMoods = newestFirst.take(selectedCount.toInt())
-
-
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -56,46 +52,47 @@ fun GeminiDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Suwak wyboru liczby wpisów do analizy
-                Text(
-                    text = "Liczba wpisów do analizy: ${selectedCount.toInt()}",
-                    fontSize = 16.sp
-                )
-                val sliderMax = maxEntries.coerceAtMost(5)
-                Slider(
-                    value = selectedCount,
-                    onValueChange = { selectedCount = it },
-                    valueRange = 1f..sliderMax.toFloat(),
-                    steps = (maxEntries - 1).coerceAtLeast(0),
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-
-                // Wyświetlenie krótkiego podglądu wybranych wpisów
-                selectedMoods.forEach { mood ->
+                if (analysisResult == null) {
+                    // Wyświetlamy suwak oraz podgląd wybranych wpisów tylko gdy nie ma wyniku analizy
                     Text(
-                        text = "Ocena: ${mood.moodRating} - Opis: ${
-                            if (mood.note.length > 50) mood.note.take(50) + "..." else mood.note
-                        }",
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        text = "Liczba wpisów do analizy: ${selectedCount.toInt()}",
+                        fontSize = 16.sp
                     )
-                }
-
-                // Jeśli wynik analizy jest dostępny, go wyświetlamy.
-                analysisResult?.let { result ->
+                    Slider(
+                        value = selectedCount,
+                        onValueChange = { selectedCount = it },
+                        valueRange = 1f..sliderMax.toFloat(),
+                        steps = (sliderMax - 1).coerceAtLeast(0),
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                    // Wyświetlenie krótkiego podglądu wybranych wpisów
+                    selectedMoods.forEach { mood ->
+                        Text(
+                            text = "Ocena: ${mood.moodRating} - Opis: ${
+                                if (mood.note.length > 50) mood.note.take(50) + "..." else mood.note
+                            }",
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                    }
+                } else {
+                    // Gdy jest wynik analizy, ukrywamy suwak oraz podgląd wpisów i wyświetlamy tylko wynik
                     Text(
-                        text = "Wynik analizy: $result",
+                        text = "Wynik analizy: $analysisResult",
                         fontSize = 16.sp,
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
             }
         },
         confirmButton = {
-            Button(
-                onClick = { onAnalyze(selectedMoods) }
-            ) {
-                Text(text = "Analizuj")
+            // Przycisk "Analizuj" powinien być aktywny tylko wtedy, gdy nie ma wyniku analizy
+            if (analysisResult == null) {
+                Button(
+                    onClick = { onAnalyze(selectedMoods) }
+                ) {
+                    Text(text = "Analizuj")
+                }
             }
         },
         dismissButton = {
