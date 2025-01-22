@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import temu.monitorzdrowia.data.models.Mood
+import temu.monitorzdrowia.data.models.User
 
 // Interfejs MoodDao to nasz Data Access Object (DAO), który definiuje metody do interakcji z bazą danych Room.
 // Dzięki DAO możemy w prosty sposób dodawać, usuwać i pobierać dane z tabeli Mood.
@@ -33,4 +34,11 @@ interface MoodDao {
     // Sortowanie po ocenie od najniższej do najwyższej (rosnąco)
     @Query("SELECT * FROM Mood ORDER BY MoodRating ASC")
     fun orderByRatingAscending(): Flow<List<Mood>>
+
+    @Insert
+    suspend fun insertUser(user: User)
+    // suspend umożliwia wykonywanie tej operacji w tle.
+
+    @Delete
+    suspend fun deleteUser(user: User)
 }
