@@ -109,6 +109,9 @@ class MoodViewModel(
                 _state.update { it.copy(isAnalyzingMood = false) }
             }
 
+            is MoodEvent.ResetAnalysisResult -> {
+                _state.value = state.value.copy(analysisResult = null)}
+
             is MoodEvent.AnalyzeMood -> {
                 viewModelScope.launch {
                     // Łączymy opisy z przekazanej listy Mood – każdy wpis oddzielony jest znakiem nowej linii

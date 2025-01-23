@@ -173,7 +173,10 @@ fun MoodScreen(
                 // Implementację funkcji analizy możesz zrealizować według własnych potrzeb.
                 onEvent(MoodEvent.AnalyzeMood(selectedMoods))
             },
-            onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) }
+            onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) },
+            onShake = {
+                // To wywoła event do zresetowania wyniku
+                onEvent(MoodEvent.ResetAnalysisResult)}
         )
     }
 

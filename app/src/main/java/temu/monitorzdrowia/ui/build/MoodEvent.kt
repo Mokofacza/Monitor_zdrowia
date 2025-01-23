@@ -17,5 +17,6 @@ sealed class MoodEvent {
     data class SetNote(val note: String) : MoodEvent()
     data class SetRating(val moodRating: Int) : MoodEvent()
     object SaveRating : MoodEvent()
+    object ResetAnalysisResult : MoodEvent()
 }
 

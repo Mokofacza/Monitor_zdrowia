@@ -1,5 +1,7 @@
+// GeminiDialog.kt
 package temu.monitorzdrowia.ui.build
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,9 +12,11 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import temu.monitorzdrowia.data.models.Mood
+import temu.monitorzdrowia.ui.build.ShakeDetector
 import kotlin.math.roundToInt
 
 /**
@@ -23,6 +27,7 @@ import kotlin.math.roundToInt
  * @param onAnalyze Funkcja uruchamiana po kliknięciu przycisku "Analizuj".
  *                  Wybrana lista wpisów zostanie przekazana do logiki analizy.
  * @param onDismiss Funkcja wywoływana przy zamknięciu dialogu.
+ * @param onShake Funkcja wywoływana przy wykryciu zatrzęsienia telefonu.
  * @param modifier Opcjonalne modyfikatory.
  */
 @Composable
@@ -31,14 +36,27 @@ fun GeminiDialog(
     analysisResult: String? = null,
     onAnalyze: (List<Mood>) -> Unit,
     onDismiss: () -> Unit,
+    onShake: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
+    // Inicjalizujemy ShakeDetector i przekazujemy callback onShake
+    val shakeDetector = remember { ShakeDetector(onShake) }
+
+    DisposableEffect(Unit) {
+        shakeDetector.start(context)
+        onDispose {
+            shakeDetector.stop()
+        }
+    }
+
     if (moodHistory.isEmpty()) {
         // Wyświetlamy dialog informujący o braku wpisów do analizy
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(text = "Brak wpisów") },
-            text = { Text(text = "Uzupełnij proszę swoje wpisy.") },
+            text = { Text(text = "Brak wpisów do analizy.") },
             confirmButton = {
                 Button(onClick = onDismiss) {
                     Text("OK")
@@ -57,6 +75,17 @@ fun GeminiDialog(
         var selectedCount by remember { mutableStateOf(if (sliderMax >= 3) 3f else sliderMax.toFloat()) }
         // Pobierz najnowsze wpisy na podstawie wybranej liczby
         val selectedMoods = newestFirst.take(selectedCount.toInt())
+
+        // Inicjalizujemy ShakeDetector
+        val shakeDetector = remember { ShakeDetector(onShake) }
+
+        // Rejestrujemy nasłuchiwacz sensorów tylko podczas kompozycji dialogu
+        DisposableEffect(Unit) {
+            shakeDetector.start(context)
+            onDispose {
+                shakeDetector.stop()
+            }
+        }
 
         AlertDialog(
             onDismissRequest = onDismiss,
