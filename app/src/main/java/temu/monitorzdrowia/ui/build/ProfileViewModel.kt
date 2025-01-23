@@ -10,10 +10,10 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class ProfileViewModel(
-    private val dao: MoodDao // Upewnij się, że to DAO ma updateUser(...)
+    private val dao: MoodDao // musi mieć updateUser(user: User)
 ) : ViewModel() {
 
-    // Pomocnicza funkcja – obliczanie wieku
+    // Pomocnicze: obliczanie wieku
     private fun LocalDate.calculateAge(): Int {
         val now = LocalDate.now()
         return ChronoUnit.YEARS.between(this, now).toInt()
@@ -25,29 +25,24 @@ class ProfileViewModel(
     // Strumień pobierający usera z bazy
     private val userFlow: Flow<User?> = dao.getUser()
 
-    // Połączenie (combine) wewn. stanu i userFlow
+    // Łączymy (combine) wewn. stan i userFlow
     val state: StateFlow<ProfileState> = combine(_state, userFlow) { currentState, userFromDb ->
-        // Jeśli user == null -> pokaż dialog tworzenia profilu
         val showDialog = userFromDb == null
         val calculatedAge = userFromDb?.birthDate?.calculateAge()
-
         currentState.copy(
             user = userFromDb,
             isDialogVisible = showDialog,
             age = calculatedAge
         )
     }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ProfileState()
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        ProfileState()
     )
 
     fun onEvent(event: ProfileEvent) {
         when (event) {
-
-            // -------------------
             // 1) Tworzenie profilu
-            // -------------------
             is ProfileEvent.SetName -> {
                 _state.update { it.copy(name = event.name) }
             }
@@ -66,14 +61,12 @@ class ProfileViewModel(
             is ProfileEvent.SetCitySize -> {
                 _state.update { it.copy(citySize = event.citySize) }
             }
-
             ProfileEvent.ShowFillDataDialog -> {
                 _state.update { it.copy(isDialogVisible = true) }
             }
             ProfileEvent.HideFillDataDialog -> {
                 _state.update { it.copy(isDialogVisible = false) }
             }
-
             ProfileEvent.SaveUser -> {
                 val s = _state.value
                 val canSave = s.name.isNotBlank() &&
@@ -82,7 +75,6 @@ class ProfileViewModel(
                         s.sex.isNotBlank() &&
                         s.address.isNotBlank() &&
                         s.citySize.isNotBlank()
-
                 if (canSave) {
                     viewModelScope.launch {
                         dao.insertUser(
@@ -96,7 +88,7 @@ class ProfileViewModel(
                             )
                         )
                     }
-                    // Czyścimy formularz
+                    // czyścimy formularz
                     _state.update {
                         it.copy(
                             name = "",
@@ -111,9 +103,7 @@ class ProfileViewModel(
                 }
             }
 
-            // -------------------
-            // 2) Dodawanie/zmiana zdjęcia
-            // -------------------
+            // 2) Dodawanie / zmiana zdjęcia
             is ProfileEvent.UpdatePhoto -> {
                 val user = _state.value.user ?: return
                 val updatedUser = user.copy(photo = event.photo)
@@ -122,9 +112,7 @@ class ProfileViewModel(
                 }
             }
 
-            // -------------------
             // 3) Edycja pojedynczych pól (3 kropki -> Edytuj)
-            // -------------------
             is ProfileEvent.StartEdit -> {
                 val user = _state.value.user ?: return
                 when (event.field) {
@@ -178,7 +166,6 @@ class ProfileViewModel(
                     }
                 }
             }
-
             is ProfileEvent.ChangeEditValue -> {
                 _state.update { it.copy(tempValue = event.value) }
             }
@@ -199,12 +186,11 @@ class ProfileViewModel(
                     ProfileField.Address -> user.copy(address = tmpVal)
                     ProfileField.CitySize -> user.copy(citySize = tmpVal)
                 }
-
-                // Zapis w bazie
+                // zapis w bazie
                 viewModelScope.launch {
                     dao.updateUser(updatedUser)
                 }
-                // Zamykamy dialog
+                // zamykamy dialog
                 _state.update {
                     it.copy(
                         isEditDialogVisible = false,
@@ -215,6 +201,7 @@ class ProfileViewModel(
                 }
             }
             ProfileEvent.CancelEdit -> {
+                // anulowanie
                 _state.update {
                     it.copy(
                         isEditDialogVisible = false,

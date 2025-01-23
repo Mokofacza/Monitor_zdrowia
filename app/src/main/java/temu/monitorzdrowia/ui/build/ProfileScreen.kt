@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package temu.monitorzdrowia.ui.build
 
 import android.app.DatePickerDialog
@@ -6,18 +8,49 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import temu.monitorzdrowia.data.models.User
 import java.time.LocalDate
@@ -29,13 +62,14 @@ fun ProfileScreen(
 ) {
     val state = viewModel.state.collectAsState().value
 
-    // 1. Dialog do tworzenia profilu (jeżeli user == null)
+    // 1. Dialog do pierwszego tworzenia profilu
     if (state.isDialogVisible) {
         AlertDialog(
             onDismissRequest = { viewModel.onEvent(ProfileEvent.HideFillDataDialog) },
             title = { Text("Uzupełnij dane użytkownika") },
             text = {
                 Column {
+                    // Imię
                     OutlinedTextField(
                         value = state.name,
                         onValueChange = { viewModel.onEvent(ProfileEvent.SetName(it)) },
@@ -44,6 +78,7 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.height(8.dp))
 
+                    // Nazwisko
                     OutlinedTextField(
                         value = state.subname,
                         onValueChange = { viewModel.onEvent(ProfileEvent.SetSubName(it)) },
@@ -52,6 +87,7 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.height(8.dp))
 
+                    // Data urodzenia
                     DatePickerButton(
                         selectedDate = state.birthDate,
                         onDateSelected = {
@@ -60,6 +96,7 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.height(8.dp))
 
+                    // Adres
                     OutlinedTextField(
                         value = state.address,
                         onValueChange = { viewModel.onEvent(ProfileEvent.SetAddress(it)) },
@@ -68,6 +105,7 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.height(8.dp))
 
+                    // Płeć
                     SexDropdown(
                         selectedSex = state.sex,
                         onSexSelected = { sex ->
@@ -76,6 +114,7 @@ fun ProfileScreen(
                     )
                     Spacer(Modifier.height(8.dp))
 
+                    // Wielkość aglomeracji
                     CitySizeDropdown(
                         selectedCitySize = state.citySize,
                         onCitySizeSelected = { cs ->
@@ -97,7 +136,7 @@ fun ProfileScreen(
         )
     }
 
-    // 2. Drugi dialog – edycja pojedynczego pola (StartEdit -> fieldBeingEdited)
+    // 2. Dialog – edycja pojedynczego pola
     if (state.isEditDialogVisible) {
         EditDialog(
             state = state,
@@ -105,7 +144,7 @@ fun ProfileScreen(
         )
     }
 
-    // 3. Profil – wyświetlamy, jeśli user != null, w Box z centrowaniem
+    // 3. Profil – jeśli user != null, centrowany w Box
     if (state.user != null) {
         Box(
             modifier = Modifier
@@ -121,6 +160,7 @@ fun ProfileScreen(
             )
         }
     } else {
+        // Gdy brak usera
         Text(
             text = "Brak użytkownika. Wypełnij dane w wyświetlonym oknie dialogowym.",
             modifier = Modifier.padding(16.dp)
@@ -129,14 +169,14 @@ fun ProfileScreen(
 }
 
 /**
- * Dialog do edycji wybranego pola (np. Imię, Nazwisko, Data, Płeć, Adres, CitySize).
+ * Drugi dialog: Edycja wybranego pola (np. Imię, Nazwisko, Data, Płeć).
  */
 @Composable
 fun EditDialog(
     state: ProfileState,
     onEvent: (ProfileEvent) -> Unit
 ) {
-    val field = state.fieldBeingEdited ?: return
+    val field = state.fieldBeingEdited ?: return // Bez tego nie ma co edytować
 
     AlertDialog(
         onDismissRequest = { onEvent(ProfileEvent.CancelEdit) },
@@ -144,39 +184,27 @@ fun EditDialog(
         text = {
             when (field) {
                 ProfileField.BirthDate -> {
-                    // Wybór daty
                     DatePickerButton(
                         selectedDate = state.tempDate,
-                        onDateSelected = { newDate ->
-                            onEvent(ProfileEvent.ChangeEditDate(newDate))
-                        }
+                        onDateSelected = { date -> onEvent(ProfileEvent.ChangeEditDate(date)) }
                     )
                 }
                 ProfileField.Sex -> {
-                    // Dropdown z płcią
                     SexDropdown(
                         selectedSex = state.tempValue,
-                        onSexSelected = { sex ->
-                            onEvent(ProfileEvent.ChangeEditValue(sex))
-                        }
+                        onSexSelected = { sex -> onEvent(ProfileEvent.ChangeEditValue(sex)) }
                     )
                 }
                 ProfileField.CitySize -> {
-                    // Dropdown z wielkością aglomeracji
                     CitySizeDropdown(
                         selectedCitySize = state.tempValue,
-                        onCitySizeSelected = { cs ->
-                            onEvent(ProfileEvent.ChangeEditValue(cs))
-                        }
+                        onCitySizeSelected = { cs -> onEvent(ProfileEvent.ChangeEditValue(cs)) }
                     )
                 }
                 else -> {
-                    // Pozostałe pola – zwykły TextField
                     OutlinedTextField(
                         value = state.tempValue,
-                        onValueChange = { newValue ->
-                            onEvent(ProfileEvent.ChangeEditValue(newValue))
-                        },
+                        onValueChange = { newVal -> onEvent(ProfileEvent.ChangeEditValue(newVal)) },
                         label = { Text("Nowa wartość") }
                     )
                 }
@@ -196,7 +224,7 @@ fun EditDialog(
 }
 
 /**
- * Przycisk do wybierania daty.
+ * Przycisk – otwiera natywny DatePickerDialog do wybrania daty.
  */
 @Composable
 fun DatePickerButton(
@@ -216,13 +244,11 @@ fun DatePickerButton(
 
     val datePickerDialog = DatePickerDialog(
         context,
-        { _, selectedYear, selectedMonth, selectedDay ->
-            val newDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay)
+        { _, y, m, d ->
+            val newDate = LocalDate.of(y, m + 1, d)
             onDateSelected(newDate)
         },
-        year,
-        month,
-        dayOfMonth
+        year, month, dayOfMonth
     )
 
     Button(onClick = { datePickerDialog.show() }) {
@@ -231,7 +257,7 @@ fun DatePickerButton(
 }
 
 /**
- * Dropdown do wyboru płci.
+ * Dropdown do wyboru płci – używamy nowszej wersji menuAnchor(...).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -247,7 +273,7 @@ fun SexDropdown(
         onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = if (selectedSex.isBlank()) "Wybierz płeć" else selectedSex,
+            value = selectedSex.ifBlank { "Wybierz płeć" },
             onValueChange = {},
             readOnly = true,
             label = { Text("Płeć") },
@@ -255,6 +281,7 @@ fun SexDropdown(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
             modifier = Modifier
+                // UŻYWAMY NOWEGO PRZECIĄŻENIA:
                 .menuAnchor()
                 .fillMaxWidth()
         )
@@ -277,7 +304,7 @@ fun SexDropdown(
 }
 
 /**
- * Dropdown do wyboru wielkości aglomeracji.
+ * Dropdown do wyboru wielkości aglomeracji – też z menuAnchor(...).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -293,21 +320,21 @@ fun CitySizeDropdown(
         onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
-            value = if (selectedCitySize.isBlank()) "Wybierz aglomerację" else selectedCitySize,
+            value = selectedCitySize.ifBlank { "Wybierz aglomerację" },
             onValueChange = {},
             readOnly = true,
             label = { Text("Wielkość aglomeracji") },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
+            modifier = Modifier.run {
+                        menuAnchor()
+                        .fillMaxWidth()
+            }
         )
-
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             options.forEach { cityOption ->
                 DropdownMenuItem(
@@ -323,7 +350,8 @@ fun CitySizeDropdown(
 }
 
 /**
- * Jedna linijka "tabeli" w profilu, z możliwością edycji (3 kropki) lub bez.
+ * Wiersz z danymi w profilu.
+ * Jeżeli onEditClick != null, pokazujemy 3 kropki -> "Edytuj".
  */
 @Composable
 fun DataRow(
@@ -337,19 +365,18 @@ fun DataRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Start
     ) {
-        // Etykieta pogrubiona
+        // Etykieta (pogrubiona)
         Text(
             text = label,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier.width(110.dp)
         )
         // Wartość
         Text(value)
 
-        // Rozszerzający się odstęp – pcha kropki w prawo
         Spacer(modifier = Modifier.weight(1f))
 
-        // 3 kropki – tylko jeśli onEditClick != null
+        // 3 kropki
         if (onEditClick != null) {
             IconButton(onClick = { menuExpanded = true }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "Menu")
@@ -371,8 +398,9 @@ fun DataRow(
 }
 
 /**
- * Karta z danymi użytkownika (i ewentualnie wiekiem),
- * wyśrodkowana w Box (w ProfileScreen).
+ * Wyświetlenie profilu – karta w centrum ekranu (Box).
+ * Kliknięcie w zdjęcie -> galeria.
+ * onEditField(...) -> "Edytuj" jednego pola.
  */
 @Composable
 fun ProfileContent(
@@ -383,7 +411,7 @@ fun ProfileContent(
 ) {
     val context = LocalContext.current
 
-    // Launcher do wybrania zdjęcia z galerii
+    // Launcher do wybierania zdjęcia
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -398,13 +426,11 @@ fun ProfileContent(
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(8.dp),
-        modifier = Modifier
-            // Dodatkowe marginesy w Box
-            .wrapContentSize()
+        modifier = Modifier.wrapContentSize() // w Box jest centrowane
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally // Wyśrodkowanie zawartości
+            horizontalAlignment = Alignment.CenterHorizontally // wyśrodkuj wewnątrz karty
         ) {
             Text(
                 text = "Profil Użytkownika",
@@ -412,7 +438,7 @@ fun ProfileContent(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Zdjęcie/Ikona
+            // Zdjęcie / Ikona
             if (user.photo != null) {
                 val bitmap = remember(user.photo) {
                     BitmapFactory.decodeByteArray(user.photo, 0, user.photo.size)
@@ -428,7 +454,7 @@ fun ProfileContent(
                 }
             } else {
                 Icon(
-                    Icons.Default.AccountCircle,
+                    imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Brak zdjęcia",
                     modifier = Modifier
                         .size(120.dp)
@@ -437,41 +463,44 @@ fun ProfileContent(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Dane w "wierszach"
+            // Imię
             DataRow(
                 label = "Imię:",
                 value = user.name,
                 onEditClick = { onEditField(ProfileField.Name) }
             )
+            // Nazwisko
             DataRow(
                 label = "Nazwisko:",
                 value = user.subname,
                 onEditClick = { onEditField(ProfileField.Subname) }
             )
+            // Data
             DataRow(
                 label = "Data ur.:",
                 value = user.birthDate.toString(),
                 onEditClick = { onEditField(ProfileField.BirthDate) }
             )
-
-            // Wiek – brak edycji
+            // Wiek (bez edycji)
             if (age != null) {
                 DataRow(
                     label = "Wiek:",
                     value = "$age lat"
                 )
             }
-
+            // Adres
             DataRow(
                 label = "Adres:",
                 value = user.address ?: "-",
                 onEditClick = { onEditField(ProfileField.Address) }
             )
+            // Płeć
             DataRow(
                 label = "Płeć:",
                 value = user.sex ?: "-",
                 onEditClick = { onEditField(ProfileField.Sex) }
             )
+            // Aglomeracja
             DataRow(
                 label = "Aglomeracja:",
                 value = user.citySize ?: "-",
