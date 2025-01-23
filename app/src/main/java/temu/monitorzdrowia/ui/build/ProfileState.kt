@@ -8,5 +8,15 @@ data class ProfileState(
     val name: String = "",
     val subname: String = "",
     val birthDate: LocalDate? = null,
-    val isDialogVisible: Boolean = false
+    val sex: String = "",
+    val address: String = "",
+    val citySize: String = "",
+    val isDialogVisible: Boolean = false,
+    val age: Int? = null,
+
+    // Nowe pola do "edycji jednego elementu"
+    val isEditDialogVisible: Boolean = false,
+    val fieldBeingEdited: ProfileField? = null,
+    val tempValue: String = "",     // Tekst tymczasowy (np. dla name, subname, sex, address, citySize)
+    val tempDate: LocalDate? = null // Tymczasowa data (dla birthDate)
 )
