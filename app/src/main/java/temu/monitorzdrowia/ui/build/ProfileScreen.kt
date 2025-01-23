@@ -2,116 +2,111 @@ package temu.monitorzdrowia.ui.build
 
 import android.app.DatePickerDialog
 import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.google.ai.client.generativeai.GenerativeModel
+import temu.monitorzdrowia.data.models.User
 import java.time.LocalDate
 import java.util.Calendar
-import temu.monitorzdrowia.data.models.User
-import androidx.compose.runtime.getValue
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel
+    viewModel: ProfileViewModel = viewModel()
 ) {
     val state = viewModel.state.collectAsState().value
 
+    // 1. Dialog do tworzenia profilu (jeżeli user == null)
     if (state.isDialogVisible) {
         AlertDialog(
             onDismissRequest = { viewModel.onEvent(ProfileEvent.HideFillDataDialog) },
             title = { Text("Uzupełnij dane użytkownika") },
             text = {
                 Column {
-                    // Imię
                     OutlinedTextField(
                         value = state.name,
                         onValueChange = { viewModel.onEvent(ProfileEvent.SetName(it)) },
                         label = { Text("Imię") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // Nazwisko
                     OutlinedTextField(
                         value = state.subname,
                         onValueChange = { viewModel.onEvent(ProfileEvent.SetSubName(it)) },
                         label = { Text("Nazwisko") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // Data urodzenia (dynamiczny przycisk)
                     DatePickerButton(
                         selectedDate = state.birthDate,
                         onDateSelected = {
                             viewModel.onEvent(ProfileEvent.SetBirthDate(it))
                         }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // Adres
                     OutlinedTextField(
                         value = state.address,
                         onValueChange = { viewModel.onEvent(ProfileEvent.SetAddress(it)) },
                         label = { Text("Adres") },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // Dropdown dla Płci
                     SexDropdown(
                         selectedSex = state.sex,
-                        onSexSelected = { viewModel.onEvent(ProfileEvent.SetSex(it)) }
+                        onSexSelected = { sex ->
+                            viewModel.onEvent(ProfileEvent.SetSex(sex))
+                        }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // Dropdown dla Wielkości aglomeracji
                     CitySizeDropdown(
                         selectedCitySize = state.citySize,
-                        onCitySizeSelected = { viewModel.onEvent(ProfileEvent.SetCitySize(it)) }
+                        onCitySizeSelected = { cs ->
+                            viewModel.onEvent(ProfileEvent.SetCitySize(cs))
+                        }
                     )
                 }
             },
             confirmButton = {
-                TextButton(
-                    onClick = { viewModel.onEvent(ProfileEvent.SaveUser) }
-                ) {
+                TextButton(onClick = { viewModel.onEvent(ProfileEvent.SaveUser) }) {
                     Text("Zapisz")
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.onEvent(ProfileEvent.HideFillDataDialog)
-                    }
-                ) {
+                TextButton(onClick = { viewModel.onEvent(ProfileEvent.HideFillDataDialog) }) {
                     Text("Anuluj")
                 }
             }
         )
     }
 
-    // Gdy user istnieje, wyświetlamy główny profil
+    // 2. Drugi dialog – edycja pojedynczego pola (StartEdit -> fieldBeingEdited)
+    if (state.isEditDialogVisible) {
+        EditDialog(
+            state = state,
+            onEvent = { viewModel.onEvent(it) }
+        )
+    }
+
+    // 3. Profil – wyświetlamy, jeśli user != null, w Box z centrowaniem
     if (state.user != null) {
-        // Całość wyśrodkowana pionowo i poziomo
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -121,9 +116,8 @@ fun ProfileScreen(
             ProfileContent(
                 user = state.user,
                 age = state.age,
-                onPickPhoto = { bytes ->
-                    viewModel.onEvent(ProfileEvent.UpdatePhoto(bytes))
-                }
+                onPickPhoto = { bytes -> viewModel.onEvent(ProfileEvent.UpdatePhoto(bytes)) },
+                onEditField = { field -> viewModel.onEvent(ProfileEvent.StartEdit(field)) }
             )
         }
     } else {
@@ -135,8 +129,74 @@ fun ProfileScreen(
 }
 
 /**
- * Przycisk do wybierania daty (DatePickerDialog).
- * Po wybraniu, napis przycisku zmienia się na `YYYY-MM-DD`.
+ * Dialog do edycji wybranego pola (np. Imię, Nazwisko, Data, Płeć, Adres, CitySize).
+ */
+@Composable
+fun EditDialog(
+    state: ProfileState,
+    onEvent: (ProfileEvent) -> Unit
+) {
+    val field = state.fieldBeingEdited ?: return
+
+    AlertDialog(
+        onDismissRequest = { onEvent(ProfileEvent.CancelEdit) },
+        title = { Text("Edycja: ${fieldToString(field)}") },
+        text = {
+            when (field) {
+                ProfileField.BirthDate -> {
+                    // Wybór daty
+                    DatePickerButton(
+                        selectedDate = state.tempDate,
+                        onDateSelected = { newDate ->
+                            onEvent(ProfileEvent.ChangeEditDate(newDate))
+                        }
+                    )
+                }
+                ProfileField.Sex -> {
+                    // Dropdown z płcią
+                    SexDropdown(
+                        selectedSex = state.tempValue,
+                        onSexSelected = { sex ->
+                            onEvent(ProfileEvent.ChangeEditValue(sex))
+                        }
+                    )
+                }
+                ProfileField.CitySize -> {
+                    // Dropdown z wielkością aglomeracji
+                    CitySizeDropdown(
+                        selectedCitySize = state.tempValue,
+                        onCitySizeSelected = { cs ->
+                            onEvent(ProfileEvent.ChangeEditValue(cs))
+                        }
+                    )
+                }
+                else -> {
+                    // Pozostałe pola – zwykły TextField
+                    OutlinedTextField(
+                        value = state.tempValue,
+                        onValueChange = { newValue ->
+                            onEvent(ProfileEvent.ChangeEditValue(newValue))
+                        },
+                        label = { Text("Nowa wartość") }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onEvent(ProfileEvent.ConfirmEdit) }) {
+                Text("Zapisz")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onEvent(ProfileEvent.CancelEdit) }) {
+                Text("Anuluj")
+            }
+        }
+    )
+}
+
+/**
+ * Przycisk do wybierania daty.
  */
 @Composable
 fun DatePickerButton(
@@ -145,23 +205,24 @@ fun DatePickerButton(
 ) {
     val context = LocalContext.current
     val label = selectedDate?.toString() ?: "Wybierz datę"
+
     val calendar = Calendar.getInstance()
     selectedDate?.let {
         calendar.set(it.year, it.monthValue - 1, it.dayOfMonth)
     }
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
 
     val datePickerDialog = DatePickerDialog(
         context,
-        { _, selectedYear, selectedMonth, selectedDayOfMonth ->
-            val newDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDayOfMonth)
+        { _, selectedYear, selectedMonth, selectedDay ->
+            val newDate = LocalDate.of(selectedYear, selectedMonth + 1, selectedDay)
             onDateSelected(newDate)
         },
         year,
         month,
-        day
+        dayOfMonth
     )
 
     Button(onClick = { datePickerDialog.show() }) {
@@ -170,7 +231,7 @@ fun DatePickerButton(
 }
 
 /**
- * Dropdown do wyboru płci (jednokrotnego wyboru).
+ * Dropdown do wyboru płci.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -190,20 +251,23 @@ fun SexDropdown(
             onValueChange = {},
             readOnly = true,
             label = { Text("Płeć") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
         )
+
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            options.forEach { sexOption ->
+            options.forEach { sex ->
                 DropdownMenuItem(
-                    text = { Text(sexOption) },
+                    text = { Text(sex) },
                     onClick = {
-                        onSexSelected(sexOption)
+                        onSexSelected(sex)
                         expanded = false
                     }
                 )
@@ -233,20 +297,23 @@ fun CitySizeDropdown(
             onValueChange = {},
             readOnly = true,
             label = { Text("Wielkość aglomeracji") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
         )
+
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            options.forEach { citySizeOption ->
+            options.forEach { cityOption ->
                 DropdownMenuItem(
-                    text = { Text(citySizeOption) },
+                    text = { Text(cityOption) },
                     onClick = {
-                        onCitySizeSelected(citySizeOption)
+                        onCitySizeSelected(cityOption)
                         expanded = false
                     }
                 )
@@ -255,43 +322,89 @@ fun CitySizeDropdown(
     }
 }
 
+/**
+ * Jedna linijka "tabeli" w profilu, z możliwością edycji (3 kropki) lub bez.
+ */
+@Composable
+fun DataRow(
+    label: String,
+    value: String,
+    onEditClick: (() -> Unit)? = null
+) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        // Etykieta pogrubiona
+        Text(
+            text = label,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(100.dp)
+        )
+        // Wartość
+        Text(value)
+
+        // Rozszerzający się odstęp – pcha kropki w prawo
+        Spacer(modifier = Modifier.weight(1f))
+
+        // 3 kropki – tylko jeśli onEditClick != null
+        if (onEditClick != null) {
+            IconButton(onClick = { menuExpanded = true }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+            }
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Edytuj") },
+                    onClick = {
+                        menuExpanded = false
+                        onEditClick()
+                    }
+                )
+            }
+        }
+    }
+}
 
 /**
- * Główna zawartość profilu:
- * - Zdjęcie/Ikona (klikane do zmiany)
- * - Tabelaryczne wyświetlenie danych (pogrubiona etykieta, zwykły tekst dla wartości)
+ * Karta z danymi użytkownika (i ewentualnie wiekiem),
+ * wyśrodkowana w Box (w ProfileScreen).
  */
 @Composable
 fun ProfileContent(
     user: User,
     age: Int?,
-    onPickPhoto: (ByteArray) -> Unit
+    onPickPhoto: (ByteArray) -> Unit,
+    onEditField: (ProfileField) -> Unit
 ) {
     val context = LocalContext.current
-    // Launcher do wyboru zdjęcia z galerii
+
+    // Launcher do wybrania zdjęcia z galerii
     val pickImageLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            if (uri != null) {
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val bytes = inputStream.readBytes()
-                    onPickPhoto(bytes)
-                }
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val bytes = inputStream.readBytes()
+                onPickPhoto(bytes)
             }
         }
-    )
+    }
 
     Card(
+        shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(8.dp),
-        shape = RoundedCornerShape(8.dp),
         modifier = Modifier
+            // Dodatkowe marginesy w Box
             .wrapContentSize()
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .widthIn(min = 300.dp), // minimalna szerokość
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally // Wyśrodkowanie zawartości
         ) {
             Text(
                 text = "Profil Użytkownika",
@@ -299,7 +412,7 @@ fun ProfileContent(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Klikalne zdjęcie lub ikona
+            // Zdjęcie/Ikona
             if (user.photo != null) {
                 val bitmap = remember(user.photo) {
                     BitmapFactory.decodeByteArray(user.photo, 0, user.photo.size)
@@ -324,35 +437,46 @@ fun ProfileContent(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // TABELARYCZNA PREZENTACJA – etykieta pogrubiona, wartość normalna
-            DataRow(label = "Imię:", value = user.name)
-            DataRow(label = "Nazwisko:", value = user.subname)
-            DataRow(label = "Data ur.:", value = user.birthDate.toString())
+            // Dane w "wierszach"
+            DataRow(
+                label = "Imię:",
+                value = user.name,
+                onEditClick = { onEditField(ProfileField.Name) }
+            )
+            DataRow(
+                label = "Nazwisko:",
+                value = user.subname,
+                onEditClick = { onEditField(ProfileField.Subname) }
+            )
+            DataRow(
+                label = "Data ur.:",
+                value = user.birthDate.toString(),
+                onEditClick = { onEditField(ProfileField.BirthDate) }
+            )
 
+            // Wiek – brak edycji
             if (age != null) {
-                DataRow(label = "Wiek:", value = "$age lat")
+                DataRow(
+                    label = "Wiek:",
+                    value = "$age lat"
+                )
             }
-            DataRow(label = "Adres:", value = user.address ?: "-")
-            DataRow(label = "Płeć:", value = user.sex ?: "-")
-            DataRow(label = "Aglomeracja:", value = user.citySize ?: "-")
-        }
-    }
-}
 
-/**
- * Pojedynczy wiersz "tabeli": etykieta (pogrubiona) i wartość (zwykła).
- */
-@Composable
-fun DataRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        Text(
-            text = label,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(110.dp) // stała szerokość etykiety
-        )
-        Text(text = value)
+            DataRow(
+                label = "Adres:",
+                value = user.address ?: "-",
+                onEditClick = { onEditField(ProfileField.Address) }
+            )
+            DataRow(
+                label = "Płeć:",
+                value = user.sex ?: "-",
+                onEditClick = { onEditField(ProfileField.Sex) }
+            )
+            DataRow(
+                label = "Aglomeracja:",
+                value = user.citySize ?: "-",
+                onEditClick = { onEditField(ProfileField.CitySize) }
+            )
+        }
     }
 }

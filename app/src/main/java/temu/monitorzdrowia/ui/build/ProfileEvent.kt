@@ -15,4 +15,10 @@ sealed class ProfileEvent {
     object HideFillDataDialog : ProfileEvent()
     object SaveUser : ProfileEvent()
     data class UpdatePhoto(val photo: ByteArray) : ProfileEvent()
+
+    data class StartEdit(val field: ProfileField) : ProfileEvent()
+    data class ChangeEditValue(val value: String) : ProfileEvent()
+    data class ChangeEditDate(val date: LocalDate) : ProfileEvent()
+    object ConfirmEdit : ProfileEvent()
+    object CancelEdit : ProfileEvent()
 }
