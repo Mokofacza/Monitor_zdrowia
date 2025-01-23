@@ -41,4 +41,7 @@ interface MoodDao {
 
     @Delete
     suspend fun deleteUser(user: User)
+
+    @Query("SELECT * FROM User LIMIT 1")
+    fun getUser(): Flow<User?>
 }
