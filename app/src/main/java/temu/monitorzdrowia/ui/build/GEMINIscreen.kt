@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import temu.monitorzdrowia.data.models.Mood
+import kotlin.math.roundToInt
 
 /**
  * Dialog analizujący nastrój przy użyciu ostatnich wpisów (rating + opis).
@@ -32,76 +33,98 @@ fun GeminiDialog(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Upewnij się, że mamy co najmniej jeden wpis do analizy.
-    val maxEntries = moodHistory.size.coerceAtLeast(1)
-    // Posortuj listę tak, aby najnowsze wpisy były na początku
-    val newestFirst = moodHistory.sortedByDescending { it.timestamp }
-    // Upewnij się, że suwak nie przekracza 5, nawet jeśli lista ma więcej wpisów
-    val sliderMax = newestFirst.size.coerceAtMost(5)
+    if (moodHistory.isEmpty()) {
+        // Wyświetlamy dialog informujący o braku wpisów do analizy
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = "Brak wpisów") },
+            text = { Text(text = "Uzupełnij proszę swoje wpisy.") },
+            confirmButton = {
+                Button(onClick = onDismiss) {
+                    Text("OK")
+                }
+            },
+            modifier = modifier
+        )
+    } else {
+        // Jeśli są wpisy, wyświetlamy standardowy dialog analizy nastroju
+        // Posortuj listę tak, aby najnowsze wpisy były na początku
+        val newestFirst = moodHistory.sortedByDescending { it.timestamp }
+        // Upewnij się, że suwak nie przekracza 5, nawet jeśli lista ma więcej wpisów
+        val sliderMax = newestFirst.size.coerceAtMost(5)
 
-    // Domyślnie wybieramy np. 3 wpisy lub liczbę wpisów, jeśli jest ich mniej
-    var selectedCount by remember { mutableStateOf(if (sliderMax >= 3) 3f else sliderMax.toFloat()) }
-    // Pobierz najnowsze wpisy na podstawie wybranej liczby
-    val selectedMoods = newestFirst.take(selectedCount.toInt())
+        // Domyślnie wybieramy np. 3 wpisy lub liczbę wpisów, jeśli jest ich mniej
+        var selectedCount by remember { mutableStateOf(if (sliderMax >= 3) 3f else sliderMax.toFloat()) }
+        // Pobierz najnowsze wpisy na podstawie wybranej liczby
+        val selectedMoods = newestFirst.take(selectedCount.toInt())
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Analiza Nastroju") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (analysisResult == null) {
-                    // Wyświetlamy suwak oraz podgląd wybranych wpisów tylko gdy nie ma wyniku analizy
-                    Text(
-                        text = "Liczba wpisów do analizy: ${selectedCount.toInt()}",
-                        fontSize = 16.sp
-                    )
-                    Slider(
-                        value = selectedCount,
-                        onValueChange = { selectedCount = it },
-                        valueRange = 1f..sliderMax.toFloat(),
-                        steps = (sliderMax - 1).coerceAtLeast(0),
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                    // Wyświetlenie krótkiego podglądu wybranych wpisów
-                    selectedMoods.forEach { mood ->
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = "Analiza Nastroju") },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (analysisResult == null) {
+                        if (sliderMax > 1) {
+                            // Wyświetlamy suwak tylko jeśli jest więcej niż jeden wpis
+                            Text(
+                                text = "Liczba wpisów do analizy: ${selectedCount.toInt()}",
+                                fontSize = 16.sp
+                            )
+                            Slider(
+                                value = selectedCount,
+                                onValueChange = { selectedCount = it.roundToInt().toFloat() },
+                                valueRange = 1f..sliderMax.toFloat(),
+                                steps = (sliderMax - 2).coerceAtLeast(0),
+                                modifier = Modifier.padding(vertical = 16.dp)
+                            )
+                        } else {
+                            // Jeśli tylko jeden wpis, wyświetlamy statyczny tekst bez suwaka
+                            Text(
+                                text = "Liczba wpisów do analizy: ${selectedCount.toInt()}",
+                                fontSize = 16.sp
+                            )
+                        }
+                        // Wyświetlenie krótkiego podglądu wybranych wpisów
+                        selectedMoods.forEach { mood ->
+                            Text(
+                                text = "Ocena: ${mood.moodRating} - Opis: ${
+                                    if (mood.note.length > 50) mood.note.take(50) + "..." else mood.note
+                                }",
+                                fontSize = 16.sp,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    } else {
+                        // Gdy jest wynik analizy, ukrywamy suwak oraz podgląd wpisów i wyświetlamy tylko wynik
                         Text(
-                            text = "Ocena: ${mood.moodRating} - Opis: ${
-                                if (mood.note.length > 50) mood.note.take(50) + "..." else mood.note
-                            }",
+                            text = "Wynik analizy: $analysisResult",
                             fontSize = 16.sp,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 8.dp)
                         )
                     }
-                } else {
-                    // Gdy jest wynik analizy, ukrywamy suwak oraz podgląd wpisów i wyświetlamy tylko wynik
-                    Text(
-                        text = "Wynik analizy: $analysisResult",
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
                 }
-            }
-        },
-        confirmButton = {
-            // Przycisk "Analizuj" powinien być aktywny tylko wtedy, gdy nie ma wyniku analizy
-            if (analysisResult == null) {
+            },
+            confirmButton = {
+                // Przycisk "Analizuj" powinien być aktywny tylko wtedy, gdy nie ma wyniku analizy
+                if (analysisResult == null) {
+                    Button(
+                        onClick = { onAnalyze(selectedMoods) }
+                    ) {
+                        Text(text = "Analizuj")
+                    }
+                }
+            },
+            dismissButton = {
                 Button(
-                    onClick = { onAnalyze(selectedMoods) }
+                    onClick = onDismiss
                 ) {
-                    Text(text = "Analizuj")
+                    Text(text = "Anuluj")
                 }
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = onDismiss
-            ) {
-                Text(text = "Anuluj")
-            }
-        },
-        modifier = modifier
-    )
+            },
+            modifier = modifier
+        )
+    }
 }
