@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import temu.monitorzdrowia.data.models.Mood
 import temu.monitorzdrowia.data.models.User
@@ -35,9 +36,15 @@ interface MoodDao {
     @Query("SELECT * FROM Mood ORDER BY MoodRating ASC")
     fun orderByRatingAscending(): Flow<List<Mood>>
 
+
+
     @Insert
     suspend fun insertUser(user: User)
     // suspend umożliwia wykonywanie tej operacji w tle.
+
+    @Update
+    suspend fun updateUser(user: User)
+
 
     @Delete
     suspend fun deleteUser(user: User)
