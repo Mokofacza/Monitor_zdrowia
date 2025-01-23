@@ -1,3 +1,5 @@
+// build.gradle.kts
+
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -9,13 +11,13 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
-    val localProperties = Properties()
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
+// Ładowanie lokalnych właściwości
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
     localProperties.load(FileInputStream(localPropertiesFile))
-    }
-    val apiKey = localProperties.getProperty("api.key") ?: ""
-
+}
+val apiKey = localProperties.getProperty("api.key") ?: ""
 
 android {
     namespace = "temu.monitorzdrowia"
@@ -32,6 +34,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.7" // Upewnij się, że wersja jest aktualna
+    }
+
     buildTypes {
         getByName("debug") {
             buildConfigField("String", "API_KEY", "\"$apiKey\"")
@@ -45,10 +55,12 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -68,6 +80,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
     val room_version = "2.6.1"
 
     implementation("androidx.room:room-runtime:$room_version")
@@ -139,6 +152,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata")
     // Optional - Integration with RxJava
     implementation("androidx.compose.runtime:runtime-rxjava2")
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
     val nav_version = "2.8.5"
 
@@ -146,7 +160,4 @@ dependencies {
 
     // add the dependency for the Google AI client SDK for Android
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
-
-
-
 }
