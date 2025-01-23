@@ -8,5 +8,9 @@ data class ProfileState(
     val name: String = "",
     val subname: String = "",
     val birthDate: LocalDate? = null,
-    val isDialogVisible: Boolean = false
+    val sex: String = "",
+    val address: String = "",
+    val citySize: String = "",
+    val isDialogVisible: Boolean = false,
+    val age: Int? = null
 )
