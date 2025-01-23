@@ -30,7 +30,9 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             MoodDatabase::class.java,
             "mood.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     // Już masz MoodViewModel:
