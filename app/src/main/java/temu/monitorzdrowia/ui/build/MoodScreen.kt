@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,15 +71,40 @@ fun MoodScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                onEvent(MoodEvent.ShowDialog)
-            }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Dodaj")
-            }
-            Button(
-                onClick = { onEvent(MoodEvent.ShowAnalysisDialog) }
-            ) {
-                Text(text = "Analiza nastroju")
+            var menuExpanded by remember { mutableStateOf(false) }
+
+            Box (
+                modifier = Modifier
+                    .offset(y = (-16).dp) // Przesunięcie o 16dp w górę
+            ){
+                FloatingActionButton(
+                    onClick = { menuExpanded = !menuExpanded }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Menu"
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Dodaj nastrój") },
+                        onClick = {
+                            menuExpanded = false
+                            onEvent(MoodEvent.ShowDialog)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Analiza nastroju") },
+                        onClick = {
+                            menuExpanded = false
+                            onEvent(MoodEvent.ShowAnalysisDialog)
+                        }
+                    )
+                }
             }
         },
         content = { padding ->
