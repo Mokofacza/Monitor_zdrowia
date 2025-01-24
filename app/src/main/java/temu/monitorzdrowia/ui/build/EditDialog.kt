@@ -1,10 +1,15 @@
 package temu.monitorzdrowia.ui.build
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun EditDialog(
@@ -15,72 +20,63 @@ fun EditDialog(
 
     AlertDialog(
         onDismissRequest = { onEvent(ProfileEvent.CancelEdit) },
-        title = { Text("Edycja: ${fieldToString(field)}") },
+        title = { Text("Edycja ${field.name}") },
         text = {
-            when (field) {
-                ProfileField.BirthDate -> {
-                    // Wybór daty
-                    DatePickerButton(
-                        selectedDate = state.tempDate,
-                        onDateSelected = { newDate ->
-                            onEvent(ProfileEvent.ChangeEditDate(newDate))
-                        }
-                    )
-                }
-                ProfileField.Sex -> {
-                    // Dropdown z płcią
-                    SexDropdown(
-                        selectedSex = state.tempValue,
-                        onSexSelected = { sex ->
-                            onEvent(ProfileEvent.ChangeEditValue(sex))
-                        }
-                    )
-                }
-                ProfileField.CitySize -> {
-                    // Dropdown z wielkością aglomeracji
-                    CitySizeDropdown(
-                        selectedCitySize = state.tempValue,
-                        onCitySizeSelected = { cs ->
-                            onEvent(ProfileEvent.ChangeEditValue(cs))
-                        }
-                    )
-                }
-                else -> {
-                    // Pozostałe pola – zwykły TextField
-                    OutlinedTextField(
-                        value = state.tempValue,
-                        onValueChange = { newValue ->
-                            onEvent(ProfileEvent.ChangeEditValue(newValue))
-                        },
-                        label = { Text("Nowa wartość") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+            Column {
+                when (field) {
+                    ProfileField.BirthDate -> {
+                        DatePickerButton(
+                            selectedDate = state.tempDate,
+                            onDateSelected = { onEvent(ProfileEvent.ChangeEditDate(it)) }
+                        )
+                    }
+                    ProfileField.Sex -> {
+                        SexDropdown(
+                            selectedSex = state.tempValue,
+                            onSexSelected = { selectedSex ->
+                                onEvent(ProfileEvent.ChangeEditValue(selectedSex))
+                            }
+                        )
+                    }
+                    ProfileField.CitySize -> {
+                        CitySizeDropdown(
+                            selectedCitySize = state.tempValue,
+                            onCitySizeSelected = { selectedCitySize ->
+                                onEvent(ProfileEvent.ChangeEditValue(selectedCitySize))
+                            }
+                        )
+                    }
+                    else -> {
+                        OutlinedTextField(
+                            value = state.tempValue,
+                            onValueChange = { onEvent(ProfileEvent.ChangeEditValue(it)) },
+                            label = { Text(field.name) },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onEvent(ProfileEvent.ConfirmEdit) }) {
+            Button(
+                onClick = { onEvent(ProfileEvent.ConfirmEdit) },
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .defaultMinSize(minWidth = 80.dp)
+            ) {
                 Text("Zapisz")
             }
         },
         dismissButton = {
-            TextButton(onClick = { onEvent(ProfileEvent.CancelEdit) }) {
+            Button(
+                onClick = { onEvent(ProfileEvent.CancelEdit) },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .defaultMinSize(minWidth = 80.dp)
+            ) {
                 Text("Anuluj")
             }
         }
     )
-}
-
-/**
- * Pomocnicza funkcja do konwersji ProfileField na string.
- */
-fun fieldToString(field: ProfileField): String {
-    return when (field) {
-        ProfileField.Name -> "Imię"
-        ProfileField.Subname -> "Nazwisko"
-        ProfileField.BirthDate -> "Data Urodzenia"
-        ProfileField.Sex -> "Płeć"
-        ProfileField.Address -> "Adres"
-        ProfileField.CitySize -> "Wielkość Aglomeracji"
-    }
 }

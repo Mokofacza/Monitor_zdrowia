@@ -13,6 +13,8 @@ data class ProfileState(
     val citySize: String = "",
     val isDialogVisible: Boolean = false,
     val age: Int? = null,
+    val hasCancelled: Boolean = false,
+    val showMissingDataMessage: Boolean = false, // Nowa flaga
 
     // Nowe pola do "edycji jednego elementu"
     val isEditDialogVisible: Boolean = false,
