@@ -87,6 +87,7 @@ fun ProfileScreen(
             confirmButton = {
                 Button(
                     onClick = { profileViewModel.onEvent(ProfileEvent.SaveUser) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .defaultMinSize(minWidth = 80.dp)
