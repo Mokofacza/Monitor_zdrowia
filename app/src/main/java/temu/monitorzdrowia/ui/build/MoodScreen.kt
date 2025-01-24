@@ -1,6 +1,5 @@
 package temu.monitorzdrowia.ui.build
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -19,35 +18,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import temu.monitorzdrowia.SortType
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.flow.collectLatest
-import androidx.compose.ui.platform.LocalContext
-import temu.monitorzdrowia.data.models.Mood
 
 @Composable
 fun MoodScreen(
     state: MoodState,
-    onEvent: (MoodEvent) -> Unit,
-    viewModel: MoodViewModel
+    onEvent: (MoodEvent) -> Unit
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
-    val context = LocalContext.current
 
     // Stan lokalny do śledzenia, która karta jest obecnie kliknieta
     var expandedMoodId by remember { mutableStateOf<Int?>(null) }
-
-    // Stan do śledzenia, który nastrój ma zostać usunięty
-    var moodToDelete by remember { mutableStateOf<Mood?>(null) }
-
-    // Obsługa zdarzeń UiEvent
-    LaunchedEffect(key1 = true) {
-        viewModel.uiEvent.collectLatest { event ->
-            when (event) {
-                is UiEvent.ShowToast -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -90,12 +70,12 @@ fun MoodScreen(
                 }
             }
         },
-        floatingActionButton = {
+        floatingActionButton = { //issue #3
             var menuExpanded by remember { mutableStateOf(false) }
 
             Box (
                 modifier = Modifier
-                    .offset(y = (-16).dp)
+                    .offset(y = (-16).dp) // Przesunięcie o 16dp w górę
             ){
                 FloatingActionButton(
                     onClick = { menuExpanded = !menuExpanded }
@@ -134,15 +114,18 @@ fun MoodScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(state.mood) { mood ->
+                    // Sprawdzamy, czy dany element jest obecnie klikniety
                     val isExpanded = expandedMoodId == mood.id
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp, horizontal = 16.dp)
+                            // Kliknięcie w kartę będzie przełączało stan rozszerzenia
                             .clickable {
                                 expandedMoodId = if (isExpanded) null else mood.id
                             },
+                        // Jeżeli jest rozszerzona
                         colors = CardDefaults.cardColors(
                             containerColor = if (isExpanded) {
                                 MaterialTheme.colorScheme.tertiaryContainer
@@ -165,6 +148,8 @@ fun MoodScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
 
+
+                                // wyświetlamy pierwsze 50 znaków
                                 val shortNote = if (mood.note.length > 50) {
                                     mood.note.take(50) + "..."
                                 } else {
@@ -185,7 +170,7 @@ fun MoodScreen(
                                 )
                             }
                             IconButton(onClick = {
-                                moodToDelete = mood
+                                onEvent(MoodEvent.DeleteMood(mood))
                             }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
@@ -197,30 +182,6 @@ fun MoodScreen(
                     }
                 }
             }
-
-            // Dialog potwierdzający usunięcie
-            if (moodToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = { moodToDelete = null },
-                    title = { Text(text = "Potwierdź usunięcie") },
-                    text = { Text(text = "Czy na pewno chcesz usunąć ten wpis?") },
-                    confirmButton = {
-                        Button(onClick = {
-                            moodToDelete?.let { onEvent(MoodEvent.DeleteMood(it)) }
-                            moodToDelete = null
-                        }) {
-                            Text("Tak")
-                        }
-                    },
-                    dismissButton = {
-                        Button(onClick = {
-                            moodToDelete = null
-                        }) {
-                            Text("Nie")
-                        }
-                    }
-                )
-            }
         }
     )
 
@@ -228,17 +189,21 @@ fun MoodScreen(
         AddMoodDialog(state = state, onEvent = onEvent)
     }
 
+    // Dialog do analizy nastroju przy użyciu GeminI
     if (state.isAnalyzingMood) {
         GeminiDialog(
-            moodHistory = state.mood,
+            moodHistory = state.mood, // przekazujemy całą listę, suwak wybierze podzbiór
             analysisResult = state.analysisResult,
             onAnalyze = { selectedMoods ->
+                // Przekazujemy wybrane wpisy do logiki analizy.
+                // Implementację funkcji analizy możesz zrealizować według własnych potrzeb.
                 onEvent(MoodEvent.AnalyzeMood(selectedMoods))
             },
             onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) },
             onShake = {
-                onEvent(MoodEvent.ResetAnalysisResult)
-            }
+                // To wywoła event do zresetowania wyniku
+                onEvent(MoodEvent.ResetAnalysisResult)}
         )
     }
+
 }
