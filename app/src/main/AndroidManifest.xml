@@ -3,6 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="temu.monitorzdrowia">
 
+    <!-- Uprawnienia do odczytu zdjęć -->
+
+    <!-- Dla Androida 13 (API 33) i nowszych -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- Dla wersji Androida poniżej 13 (API 33) -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,9 +23,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MonitorZdrowia"
         tools:targetApi="31">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

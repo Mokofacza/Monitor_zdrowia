@@ -1,5 +1,6 @@
 package temu.monitorzdrowia.ui.build
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import temu.monitorzdrowia.data.local.MoodDao
@@ -10,7 +11,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class ProfileViewModel(
-    private val dao: MoodDao // Upewnij się, że to DAO ma updateUser(...)
+    private val dao: MoodDao // Upewnij się, że to DAO ma updateUser(...) oraz insertUser(...)
 ) : ViewModel() {
 
     // Pomocnicza funkcja – obliczanie wieku
@@ -25,7 +26,7 @@ class ProfileViewModel(
     // Strumień pobierający usera z bazy
     private val userFlow: Flow<User?> = dao.getUser()
 
-    // Połączenie (combine) wewn. stanu i userFlow
+    // Połączenie (combine) wewnętrznego stanu i userFlow
     val state: StateFlow<ProfileState> = combine(_state, userFlow) { currentState, userFromDb ->
         // Jeśli user == null -> pokaż dialog tworzenia profilu
         val showDialog = userFromDb == null
@@ -66,6 +67,14 @@ class ProfileViewModel(
             is ProfileEvent.SetCitySize -> {
                 _state.update { it.copy(citySize = event.citySize) }
             }
+            is ProfileEvent.UpdatePhoto -> {
+                val user = _state.value.user ?: return
+                val updatedUser = user.copy(photo = event.photo)
+                viewModelScope.launch {
+                    dao.updateUser(updatedUser)
+                    Log.d("ProfileViewModel", "Photo updated for user: ${updatedUser.name}")
+                }
+            }
 
             ProfileEvent.ShowFillDataDialog -> {
                 _state.update { it.copy(isDialogVisible = true) }
@@ -95,6 +104,7 @@ class ProfileViewModel(
                                 citySize = s.citySize
                             )
                         )
+                        Log.d("ProfileViewModel", "User saved: ${s.name} ${s.subname}")
                     }
                     // Czyścimy formularz
                     _state.update {
@@ -108,22 +118,13 @@ class ProfileViewModel(
                             isDialogVisible = false
                         )
                     }
+                } else {
+                    Log.d("ProfileViewModel", "Cannot save user: missing fields")
                 }
             }
 
             // -------------------
-            // 2) Dodawanie/zmiana zdjęcia
-            // -------------------
-            is ProfileEvent.UpdatePhoto -> {
-                val user = _state.value.user ?: return
-                val updatedUser = user.copy(photo = event.photo)
-                viewModelScope.launch {
-                    dao.updateUser(updatedUser)
-                }
-            }
-
-            // -------------------
-            // 3) Edycja pojedynczych pól (3 kropki -> Edytuj)
+            // 2) Edycja pojedynczych pól (3 kropki -> Edytuj)
             // -------------------
             is ProfileEvent.StartEdit -> {
                 val user = _state.value.user ?: return
@@ -203,6 +204,7 @@ class ProfileViewModel(
                 // Zapis w bazie
                 viewModelScope.launch {
                     dao.updateUser(updatedUser)
+                    Log.d("ProfileViewModel", "User updated: ${updatedUser.name} ${updatedUser.subname}")
                 }
                 // Zamykamy dialog
                 _state.update {
