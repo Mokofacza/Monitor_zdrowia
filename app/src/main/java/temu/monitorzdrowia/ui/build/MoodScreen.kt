@@ -1,3 +1,4 @@
+// MoodScreen.kt
 package temu.monitorzdrowia.ui.build
 
 import android.widget.Toast
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -22,12 +22,14 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.platform.LocalContext
 import temu.monitorzdrowia.data.models.Mood
+import temu.monitorzdrowia.data.models.User
 
 @Composable
 fun MoodScreen(
     state: MoodState,
     onEvent: (MoodEvent) -> Unit,
-    viewModel: MoodViewModel
+    viewModel: MoodViewModel,
+    profileViewModel: ProfileViewModel // Dodany parametr ProfileViewModel
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
     val context = LocalContext.current
@@ -48,6 +50,10 @@ fun MoodScreen(
             }
         }
     }
+
+    // Pobranie danych użytkownika z ProfileViewModel
+    val profileState by profileViewModel.state.collectAsState()
+    val user = profileState.user
 
     Scaffold(
         topBar = {
@@ -93,10 +99,10 @@ fun MoodScreen(
         floatingActionButton = {
             var menuExpanded by remember { mutableStateOf(false) }
 
-            Box (
+            Box(
                 modifier = Modifier
                     .offset(y = (-16).dp)
-            ){
+            ) {
                 FloatingActionButton(
                     onClick = { menuExpanded = !menuExpanded }
                 ) {
@@ -224,21 +230,31 @@ fun MoodScreen(
         }
     )
 
+    // Dialog dodawania nastroju
     if (state.isAddingMood) {
         AddMoodDialog(state = state, onEvent = onEvent)
     }
 
     if (state.isAnalyzingMood) {
-        GeminiDialog(
-            moodHistory = state.mood,
-            analysisResult = state.analysisResult,
-            onAnalyze = { selectedMoods ->
-                onEvent(MoodEvent.AnalyzeMood(selectedMoods))
-            },
-            onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) },
-            onShake = {
-                onEvent(MoodEvent.ResetAnalysisResult)
-            }
-        )
+        if (user != null) {
+            // Jeśli user != null, wyświetl standardowy dialog
+            GeminiDialog(
+                moodHistory = state.mood,
+                analysisResult = state.analysisResult,
+                onAnalyze = { selectedMoods, user ->
+                    onEvent(MoodEvent.AnalyzeMood(selectedMoods, user))
+                },
+                onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) },
+                onShake = {
+                    onEvent(MoodEvent.ResetAnalysisResult)
+                },
+                userProfile = user
+            )
+        } else {
+            // Jeśli user == null, wyświetl Toast i schowaj dialog
+            Toast.makeText(context, "Uzupełnij dane użytkownika w profilu!", Toast.LENGTH_SHORT).show()
+            // Aby nie pozostać w stanie wyświetlania dialogu
+            onEvent(MoodEvent.HideAnalysisDialog)
+        }
     }
 }
