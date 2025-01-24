@@ -5,13 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import temu.monitorzdrowia.data.local.MoodDao
 import temu.monitorzdrowia.data.models.User
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 class ProfileViewModel(
-    private val dao: MoodDao // Upewnij się, że to DAO ma updateUser(...) oraz insertUser(...)
+    private val dao: MoodDao
 ) : ViewModel() {
 
     // Pomocnicza funkcja – obliczanie wieku
@@ -23,32 +24,41 @@ class ProfileViewModel(
     // Stan wewnętrzny
     private val _state = MutableStateFlow(ProfileState())
 
-    // Strumień pobierający usera z bazy
-    private val userFlow: Flow<User?> = dao.getUser()
+    // Publiczny StateFlow do obserwacji przez UI
+    val state: StateFlow<ProfileState> = _state.asStateFlow()
 
-    // Połączenie (combine) wewnętrznego stanu i userFlow
-    val state: StateFlow<ProfileState> = combine(_state, userFlow) { currentState, userFromDb ->
-        // Jeśli user == null -> pokaż dialog tworzenia profilu
-        val showDialog = userFromDb == null
-        val calculatedAge = userFromDb?.birthDate?.calculateAge()
+    // Kanał do emitowania zdarzeń UI
+    private val _uiEvent = Channel<ProfileUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
 
-        currentState.copy(
-            user = userFromDb,
-            isDialogVisible = showDialog,
-            age = calculatedAge
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ProfileState()
-    )
+    init {
+        // Obserwacja zmian w userFlow
+        viewModelScope.launch {
+            dao.getUser().collect { userFromDb ->
+                _state.update { currentState ->
+                    val calculatedAge = userFromDb?.birthDate?.calculateAge()
+                    currentState.copy(
+                        user = userFromDb,
+                        age = calculatedAge
+                        // isDialogVisible i showMissingDataMessage zarządzane przez zdarzenia
+                    )
+                }
+            }
+        }
+
+        // Inicjalne sprawdzenie: jeśli użytkownik nie istnieje, otwórz dialog
+        viewModelScope.launch {
+            val user = dao.getUser().firstOrNull()
+            if (user == null && !_state.value.hasCancelled) {
+                _state.update { it.copy(isDialogVisible = true) }
+            }
+        }
+    }
 
     fun onEvent(event: ProfileEvent) {
         when (event) {
 
-            // -------------------
-            // 1) Tworzenie profilu
-            // -------------------
+            // Tworzenie profilu
             is ProfileEvent.SetName -> {
                 _state.update { it.copy(name = event.name) }
             }
@@ -71,19 +81,39 @@ class ProfileViewModel(
                 val user = _state.value.user ?: return
                 val updatedUser = user.copy(photo = event.photo)
                 viewModelScope.launch {
-                    dao.updateUser(updatedUser)
-                    Log.d("ProfileViewModel", "Photo updated for user: ${updatedUser.name}")
+                    try {
+                        dao.updateUser(updatedUser)
+                        Log.d("ProfileViewModel", "Photo updated for user: ${updatedUser.name}")
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Zdjęcie zaktualizowane pomyślnie"))
+                    } catch (e: Exception) {
+                        Log.e("ProfileViewModel", "Error updating photo: ${e.message}", e)
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Błąd podczas aktualizacji zdjęcia"))
+                    }
                 }
             }
 
-            ProfileEvent.ShowFillDataDialog -> {
-                _state.update { it.copy(isDialogVisible = true) }
+            is ProfileEvent.ShowFillDataDialog -> {
+                _state.update { it.copy(isDialogVisible = true, showMissingDataMessage = false) }
             }
-            ProfileEvent.HideFillDataDialog -> {
-                _state.update { it.copy(isDialogVisible = false) }
+            is ProfileEvent.HideFillDataDialog -> {
+                _state.update {
+                    it.copy(
+                        isDialogVisible = false,
+                        hasCancelled = true,
+                        showMissingDataMessage = true
+                    )
+                }
+            }
+            is ProfileEvent.ReopenDialog -> {
+                _state.update {
+                    it.copy(
+                        isDialogVisible = true,
+                        showMissingDataMessage = false
+                    )
+                }
             }
 
-            ProfileEvent.SaveUser -> {
+            is ProfileEvent.SaveUser -> {
                 val s = _state.value
                 val canSave = s.name.isNotBlank() &&
                         s.subname.isNotBlank() &&
@@ -94,19 +124,26 @@ class ProfileViewModel(
 
                 if (canSave) {
                     viewModelScope.launch {
-                        dao.insertUser(
-                            User(
-                                name = s.name,
-                                subname = s.subname,
-                                birthDate = s.birthDate,
-                                sex = s.sex,
-                                address = s.address,
-                                citySize = s.citySize
+                        try {
+                            dao.insertUser(
+                                User(
+                                    name = s.name,
+                                    subname = s.subname,
+                                    birthDate = s.birthDate,
+                                    sex = s.sex,
+                                    address = s.address,
+                                    citySize = s.citySize,
+                                    photo = s.user?.photo
+                                )
                             )
-                        )
-                        Log.d("ProfileViewModel", "User saved: ${s.name} ${s.subname}")
+                            Log.d("ProfileViewModel", "User saved: ${s.name} ${s.subname}")
+                            _uiEvent.send(ProfileUiEvent.ShowToast("Profil zapisany pomyślnie"))
+                        } catch (e: Exception) {
+                            Log.e("ProfileViewModel", "Error saving user: ${e.message}", e)
+                            _uiEvent.send(ProfileUiEvent.ShowToast("Błąd podczas zapisywania profilu"))
+                        }
                     }
-                    // Czyścimy formularz
+                    // Czyścimy formularz i resetujemy flagi
                     _state.update {
                         it.copy(
                             name = "",
@@ -115,17 +152,20 @@ class ProfileViewModel(
                             sex = "",
                             address = "",
                             citySize = "",
-                            isDialogVisible = false
+                            isDialogVisible = false,
+                            hasCancelled = false,
+                            showMissingDataMessage = false
                         )
                     }
                 } else {
                     Log.d("ProfileViewModel", "Cannot save user: missing fields")
+                    viewModelScope.launch {
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Proszę uzupełnić wszystkie wymagane pola"))
+                    }
                 }
             }
 
-            // -------------------
-            // 2) Edycja pojedynczych pól (3 kropki -> Edytuj)
-            // -------------------
+            // Edycja pojedynczych pól
             is ProfileEvent.StartEdit -> {
                 val user = _state.value.user ?: return
                 when (event.field) {
@@ -157,7 +197,7 @@ class ProfileViewModel(
                         it.copy(
                             isEditDialogVisible = true,
                             fieldBeingEdited = ProfileField.Sex,
-                            tempValue = user.sex ?: "",
+                            tempValue = user.sex.toString(),
                             tempDate = null
                         )
                     }
@@ -165,7 +205,7 @@ class ProfileViewModel(
                         it.copy(
                             isEditDialogVisible = true,
                             fieldBeingEdited = ProfileField.Address,
-                            tempValue = user.address ?: "",
+                            tempValue = user.address.toString(),
                             tempDate = null
                         )
                     }
@@ -173,7 +213,7 @@ class ProfileViewModel(
                         it.copy(
                             isEditDialogVisible = true,
                             fieldBeingEdited = ProfileField.CitySize,
-                            tempValue = user.citySize ?: "",
+                            tempValue = user.citySize.toString(),
                             tempDate = null
                         )
                     }
@@ -186,7 +226,7 @@ class ProfileViewModel(
             is ProfileEvent.ChangeEditDate -> {
                 _state.update { it.copy(tempDate = event.date) }
             }
-            ProfileEvent.ConfirmEdit -> {
+            is ProfileEvent.ConfirmEdit -> {
                 val user = _state.value.user ?: return
                 val field = _state.value.fieldBeingEdited ?: return
                 val tmpVal = _state.value.tempValue
@@ -195,18 +235,25 @@ class ProfileViewModel(
                 val updatedUser = when (field) {
                     ProfileField.Name -> user.copy(name = tmpVal)
                     ProfileField.Subname -> user.copy(subname = tmpVal)
-                    ProfileField.BirthDate -> if (tmpDate != null) user.copy(birthDate = tmpDate) else user
+                    ProfileField.BirthDate -> tmpDate?.let { user.copy(birthDate = it) } ?: user
                     ProfileField.Sex -> user.copy(sex = tmpVal)
                     ProfileField.Address -> user.copy(address = tmpVal)
                     ProfileField.CitySize -> user.copy(citySize = tmpVal)
                 }
 
-                // Zapis w bazie
+                // Zapis w bazie danych
                 viewModelScope.launch {
-                    dao.updateUser(updatedUser)
-                    Log.d("ProfileViewModel", "User updated: ${updatedUser.name} ${updatedUser.subname}")
+                    try {
+                        dao.updateUser(updatedUser)
+                        Log.d("ProfileViewModel", "User updated: ${updatedUser.name} ${updatedUser.subname}")
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Profil zaktualizowany pomyślnie"))
+                    } catch (e: Exception) {
+                        Log.e("ProfileViewModel", "Error updating user: ${e.message}", e)
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Błąd podczas aktualizacji profilu"))
+                    }
                 }
-                // Zamykamy dialog
+
+                // Zamykamy dialog edycji
                 _state.update {
                     it.copy(
                         isEditDialogVisible = false,
@@ -216,7 +263,7 @@ class ProfileViewModel(
                     )
                 }
             }
-            ProfileEvent.CancelEdit -> {
+            is ProfileEvent.CancelEdit -> {
                 _state.update {
                     it.copy(
                         isEditDialogVisible = false,

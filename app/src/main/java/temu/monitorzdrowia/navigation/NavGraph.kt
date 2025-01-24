@@ -26,7 +26,7 @@ fun AppNavGraph(
             )
         }
         composable(NavRoutes.Profile.route) {
-            ProfileScreen(viewModel = profileViewModel)
+            ProfileScreen(profileViewModel)
         }
     }
 }

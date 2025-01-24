@@ -1,29 +1,50 @@
 package temu.monitorzdrowia.ui.build
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel()
+    profileViewModel: ProfileViewModel
 ) {
-    val state by viewModel.state.collectAsState()
+    val state by profileViewModel.state.collectAsState()
+    val context = LocalContext.current
 
-    // 1. Dialog do tworzenia profilu (jeżeli user == null)
+    // Obserwowanie zdarzeń UI
+    LaunchedEffect(Unit) {
+        profileViewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is ProfileUiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+                // Możesz obsłużyć więcej zdarzeń w przyszłości
+            }
+        }
+    }
+
+    // Debugging: Log when dialog visibility changes
+    LaunchedEffect(state.isDialogVisible) {
+        // Możesz usunąć ten blok, jeśli nie potrzebujesz logów
+        // Log.d("ProfileScreen", "Dialog is visible: ${state.isDialogVisible}")
+    }
+
+    // 1. Dialog do tworzenia profilu (jeżeli user == null i nie anulowano)
     if (state.isDialogVisible) {
         AlertDialog(
-            onDismissRequest = { viewModel.onEvent(ProfileEvent.HideFillDataDialog) },
+            onDismissRequest = { profileViewModel.onEvent(ProfileEvent.HideFillDataDialog) },
             title = { Text("Uzupełnij dane użytkownika") },
             text = {
                 Column {
                     OutlinedTextField(
                         value = state.name,
-                        onValueChange = { viewModel.onEvent(ProfileEvent.SetName(it)) },
+                        onValueChange = { profileViewModel.onEvent(ProfileEvent.SetName(it)) },
                         label = { Text("Imię") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -31,7 +52,7 @@ fun ProfileScreen(
 
                     OutlinedTextField(
                         value = state.subname,
-                        onValueChange = { viewModel.onEvent(ProfileEvent.SetSubName(it)) },
+                        onValueChange = { profileViewModel.onEvent(ProfileEvent.SetSubName(it)) },
                         label = { Text("Nazwisko") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -39,15 +60,13 @@ fun ProfileScreen(
 
                     DatePickerButton(
                         selectedDate = state.birthDate,
-                        onDateSelected = {
-                            viewModel.onEvent(ProfileEvent.SetBirthDate(it))
-                        }
+                        onDateSelected = { profileViewModel.onEvent(ProfileEvent.SetBirthDate(it)) }
                     )
                     Spacer(Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = state.address,
-                        onValueChange = { viewModel.onEvent(ProfileEvent.SetAddress(it)) },
+                        onValueChange = { profileViewModel.onEvent(ProfileEvent.SetAddress(it)) },
                         label = { Text("Adres") },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -55,27 +74,34 @@ fun ProfileScreen(
 
                     SexDropdown(
                         selectedSex = state.sex,
-                        onSexSelected = { sex ->
-                            viewModel.onEvent(ProfileEvent.SetSex(sex))
-                        }
+                        onSexSelected = { sex -> profileViewModel.onEvent(ProfileEvent.SetSex(sex)) }
                     )
                     Spacer(Modifier.height(8.dp))
 
                     CitySizeDropdown(
                         selectedCitySize = state.citySize,
-                        onCitySizeSelected = { cs ->
-                            viewModel.onEvent(ProfileEvent.SetCitySize(cs))
-                        }
+                        onCitySizeSelected = { cs -> profileViewModel.onEvent(ProfileEvent.SetCitySize(cs)) }
                     )
                 }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.onEvent(ProfileEvent.SaveUser) }) {
+                Button(
+                    onClick = { profileViewModel.onEvent(ProfileEvent.SaveUser) },
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .defaultMinSize(minWidth = 80.dp)
+                ) {
                     Text("Zapisz")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.onEvent(ProfileEvent.HideFillDataDialog) }) {
+                Button(
+                    onClick = { profileViewModel.onEvent(ProfileEvent.HideFillDataDialog) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .defaultMinSize(minWidth = 80.dp)
+                ) {
                     Text("Anuluj")
                 }
             }
@@ -86,7 +112,7 @@ fun ProfileScreen(
     if (state.isEditDialogVisible) {
         EditDialog(
             state = state,
-            onEvent = { viewModel.onEvent(it) }
+            onEvent = { profileViewModel.onEvent(it) }
         )
     }
 
@@ -102,14 +128,30 @@ fun ProfileScreen(
             ProfileContent(
                 user = user,
                 age = state.age,
-                onPickPhoto = { bytes -> viewModel.onEvent(ProfileEvent.UpdatePhoto(bytes)) },
-                onEditField = { field -> viewModel.onEvent(ProfileEvent.StartEdit(field)) }
+                onPickPhoto = { bytes -> profileViewModel.onEvent(ProfileEvent.UpdatePhoto(bytes)) },
+                onEditField = { field -> profileViewModel.onEvent(ProfileEvent.StartEdit(field)) }
             )
         }
-    } else {
+    } else if (!state.hasCancelled) { // Opcjonalnie: Pokazuj komunikat tylko, jeśli nie anulowano
         Text(
             text = "Brak użytkownika. Wypełnij dane w wyświetlonym oknie dialogowym.",
             modifier = Modifier.padding(16.dp)
         )
+    }else if(state.hasCancelled) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Anulowano dodawanie użytkownika. Naciśnij przycisk by uruchomić okno dodawania użytkownika.",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            Button(onClick = { profileViewModel.onEvent(ProfileEvent.ReopenDialog) }) {
+                Text("Dodaj profil")
+            }
+        }
     }
 }
