@@ -70,7 +70,7 @@ fun MoodScreen(
                 }
             }
         },
-        floatingActionButton = {
+        floatingActionButton = { //issue #3
             var menuExpanded by remember { mutableStateOf(false) }
 
             Box (
