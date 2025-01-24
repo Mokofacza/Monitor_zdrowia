@@ -270,10 +270,7 @@ fun ProfileContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Przycisk Zapisz (opcjonalnie)
-            Button(onClick = { /* Opcjonalnie, jeśli chcesz zapisywać dane ponownie */ }) {
-                Text(text = "Zapisz")
-            }
+
         }
     }
 }
