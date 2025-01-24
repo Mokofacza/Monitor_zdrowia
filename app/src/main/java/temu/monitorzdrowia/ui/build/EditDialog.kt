@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,7 +23,7 @@ fun EditDialog(
 
     AlertDialog(
         onDismissRequest = { onEvent(ProfileEvent.CancelEdit) },
-        title = { Text("Edycja ${field.name}") },
+        title = { Text("Edycja ${field.genitiveName}") }, // Używamy genitiveName
         text = {
             Column {
                 when (field) {
@@ -50,7 +53,7 @@ fun EditDialog(
                         OutlinedTextField(
                             value = state.tempValue,
                             onValueChange = { onEvent(ProfileEvent.ChangeEditValue(it)) },
-                            label = { Text(field.name) },
+                            label = { Text(field.displayName) }, // Zmienione na displayName
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
