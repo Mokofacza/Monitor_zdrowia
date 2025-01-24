@@ -21,7 +21,8 @@ fun AppNavGraph(
         composable(NavRoutes.Mood.route) {
             MoodScreen(
                 state = viewModel.state.collectAsState().value,
-                onEvent = viewModel::onEvent
+                onEvent = viewModel::onEvent ,
+                viewModel = viewModel
             )
         }
         composable(NavRoutes.Profile.route) {
