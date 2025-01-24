@@ -111,16 +111,29 @@ class MoodViewModel(
 
             is MoodEvent.AnalyzeMood -> {
                 viewModelScope.launch {
-                    val combinedDescriptions = event.moods.joinToString(separator = "\n") { it.note }
+                    val combinedDescriptions = event.moods.joinToString(separator = "\n") { mood ->
+                        "Ocena: ${mood.moodRating}, Opis: ${mood.note}, Data wpisue: ${mood.timestamp}"
+                    }
 
-                    val prompt = "Przeanalizuj poniższe opisy nastroju, są one podane od najnowszych i daj mi radę." +
-                            " są to wpisy odnośnie nastroju pacjenta.chce byś odpowiedział w maksymalnie 10 zdaniach." +
-                            " wciel sie w role jego lekarza:\n$combinedDescriptions"
+                    val userData = """
+                        Data urodzenia: ${event.userProfile.birthDate}
+                        Płeć: ${event.userProfile.sex}
+                        Wielkość miasta: ${event.userProfile.citySize}
+                    """.trimIndent()
+
+                    val prompt = """
+                        Przeanalizuj poniższe opisy nastroju, są one podane od najnowszych i daj mi radę.
+                        są to wpisy odnośnie nastroju pacjenta. chce byś odpowiedział w maksymalnie 10 zdaniach.
+                        wciel sie w role jego lekarza:
+                        
+                        Dane użytkownika:
+                        $userData
+
+                        Wpisy nastroju:
+                        $combinedDescriptions
+                    """.trimIndent()
 
                     val response = generativeModel.generateContent(prompt)
-
-                    print(response.text)
-
                     _state.update { it.copy(analysisResult = response.text) }
                 }
             }
