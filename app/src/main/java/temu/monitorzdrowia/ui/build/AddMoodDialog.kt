@@ -25,6 +25,7 @@ fun AddMoodDialog(
     onEvent: (MoodEvent) -> Unit, // Funkcja do obsługi zdarzeń z dialogu
     modifier: Modifier = Modifier
 ) {
+
     AlertDialog(
         onDismissRequest = {
             onEvent(MoodEvent.HideDialog) // Ukryj dialog, gdy użytkownik go odrzuci
