@@ -1,3 +1,5 @@
+// temu.monitorzdrowia.ui.build.MoodViewModel.kt
+
 package temu.monitorzdrowia.ui.build
 
 import androidx.lifecycle.ViewModel
@@ -11,6 +13,7 @@ import temu.monitorzdrowia.BuildConfig
 import temu.monitorzdrowia.SortType
 import temu.monitorzdrowia.data.local.MoodDao
 import temu.monitorzdrowia.data.models.Mood
+import com.github.mikephil.charting.data.Entry
 
 sealed class UiEvent {
     data class ShowToast(val message: String) : UiEvent()
@@ -35,10 +38,20 @@ class MoodViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
+    // Funkcja do generowania moodEntries
+    private fun generateMoodEntries(moods: List<Mood>): List<Entry> {
+        return moods.sortedBy { it.timestamp }
+            .mapIndexed { index, mood ->
+                Entry(index.toFloat(), mood.moodRating.toFloat())
+            }
+    }
+
     val state = combine(_state, _sortType, _mood) { state, sortType, mood ->
+        val entries = generateMoodEntries(mood)
         state.copy(
             mood = mood,
-            sortType = sortType
+            sortType = sortType,
+            moodEntries = entries
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MoodState())
 
@@ -56,6 +69,18 @@ class MoodViewModel(
 
             MoodEvent.HideDialog -> {
                 _state.update { it.copy(isAddingMood = false) }
+            }
+
+            MoodEvent.ShowDialog -> {
+                _state.update { it.copy(isAddingMood = true) }
+            }
+
+            MoodEvent.HideChart -> {
+                _state.update { it.copy(isChartVisible = false) }
+            }
+
+            MoodEvent.ShowChart -> {
+                _state.update { it.copy(isChartVisible = true) }
             }
 
             MoodEvent.SaveRating -> {
@@ -87,10 +112,6 @@ class MoodViewModel(
 
             is MoodEvent.SetRating -> {
                 _state.update { it.copy(moodRating = event.moodRating) }
-            }
-
-            MoodEvent.ShowDialog -> {
-                _state.update { it.copy(isAddingMood = true) }
             }
 
             is MoodEvent.SortMood -> {
@@ -142,6 +163,6 @@ class MoodViewModel(
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
-        apiKey = BuildConfig.apikey
+        apiKey = BuildConfig.API_KEY // Upewnij się, że klucz jest poprawny
     )
 }

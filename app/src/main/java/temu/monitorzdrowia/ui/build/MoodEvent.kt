@@ -18,6 +18,8 @@ sealed class MoodEvent {
     data class SetRating(val moodRating: Int) : MoodEvent()
     object SaveRating : MoodEvent()
     object ResetAnalysisResult : MoodEvent()
+    object ShowChart : MoodEvent()
+    object HideChart : MoodEvent()
     data class AnalyzeMood(
         val moods: List<Mood>,
         val userProfile: User,

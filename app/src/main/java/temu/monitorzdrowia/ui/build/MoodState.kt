@@ -1,5 +1,6 @@
 package temu.monitorzdrowia.ui.build
 
+import com.github.mikephil.charting.data.Entry
 import temu.monitorzdrowia.SortType
 import temu.monitorzdrowia.data.models.Mood
 import temu.monitorzdrowia.data.models.User
@@ -13,6 +14,7 @@ data class MoodState(
     val isAnalyzingMood: Boolean = false,        // Flaga określająca, czy dialog analizy nastroju jest widoczny
     val analysisResult: String? = null,          // Opcjonalny wynik analizy nastroju
     val sortType: SortType = SortType.TIME,       // Aktualny typ sortowania nastrojów
-    val user: User? = null // Pole przechowujące dane użytkownika
-
+    val user: User? = null, // Pole przechowujące dane użytkownika
+    val isChartVisible: Boolean = false,
+    val moodEntries: List<Entry> = emptyList(),
 )

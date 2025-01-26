@@ -1,4 +1,3 @@
-// MoodScreen.kt
 package temu.monitorzdrowia.ui.build
 
 import android.widget.Toast
@@ -22,14 +21,14 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.platform.LocalContext
 import temu.monitorzdrowia.data.models.Mood
-import temu.monitorzdrowia.data.models.User
+
 
 @Composable
 fun MoodScreen(
     state: MoodState,
     onEvent: (MoodEvent) -> Unit,
     viewModel: MoodViewModel,
-    profileViewModel: ProfileViewModel // Dodany parametr ProfileViewModel
+    profileViewModel: ProfileViewModel
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
     val context = LocalContext.current
@@ -130,131 +129,154 @@ fun MoodScreen(
                             onEvent(MoodEvent.ShowAnalysisDialog)
                         }
                     )
+                    DropdownMenuItem(
+                        text = { Text("Pokaż wykres nastroju") },
+                        onClick = {
+                            menuExpanded = false
+                            onEvent(MoodEvent.ShowChart)
+                        }
+                    )
                 }
             }
         },
         content = { padding ->
-            LazyColumn(
-                contentPadding = padding,
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(state.mood) { mood ->
-                    val isExpanded = expandedMoodId == mood.id
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    contentPadding = padding,
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(state.mood) { mood ->
+                        val isExpanded = expandedMoodId == mood.id
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp, horizontal = 16.dp)
-                            .clickable {
-                                expandedMoodId = if (isExpanded) null else mood.id
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isExpanded) {
-                                MaterialTheme.colorScheme.tertiaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            }
-                        )
-                    ) {
-                        Row(
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Ocena: ${mood.moodRating}",
-                                    fontSize = 20.sp,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                val shortNote = if (mood.note.length > 50) {
-                                    mood.note.take(50) + "..."
+                                .padding(vertical = 8.dp, horizontal = 16.dp)
+                                .clickable {
+                                    expandedMoodId = if (isExpanded) null else mood.id
+                                },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isExpanded) {
+                                    MaterialTheme.colorScheme.tertiaryContainer
                                 } else {
-                                    mood.note
+                                    MaterialTheme.colorScheme.secondaryContainer
                                 }
-                                val description = if (isExpanded) mood.note else shortNote
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Ocena: ${mood.moodRating}",
+                                        fontSize = 20.sp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
 
-                                Text(
-                                    text = "Opis: $description",
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = "Data: ${mood.timestamp.format(formatter)}",
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
-                            IconButton(onClick = {
-                                moodToDelete = mood
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Usuń",
-                                    tint = MaterialTheme.colorScheme.onBackground
-                                )
+                                    val shortNote = if (mood.note.length > 50) {
+                                        mood.note.take(50) + "..."
+                                    } else {
+                                        mood.note
+                                    }
+                                    val description = if (isExpanded) mood.note else shortNote
+
+                                    Text(
+                                        text = "Opis: $description",
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = "Data: ${mood.timestamp.format(formatter)}",
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                }
+                                IconButton(onClick = {
+                                    moodToDelete = mood
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "Usuń",
+                                        tint = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            // Dialog potwierdzający usunięcie
-            if (moodToDelete != null) {
-                AlertDialog(
-                    onDismissRequest = { moodToDelete = null },
-                    title = { Text(text = "Potwierdź usunięcie") },
-                    text = { Text(text = "Czy na pewno chcesz usunąć ten wpis?") },
-                    confirmButton = {
-                        Button(onClick = {
-                            moodToDelete?.let { onEvent(MoodEvent.DeleteMood(it)) }
-                            moodToDelete = null
-                        }) {
-                            Text("Tak")
+                // Dialog wykresu nastroju
+                if (state.isChartVisible) {
+                    MoodChartDialog(
+                        moodEntries = state.moodEntries,
+                        labels = state.mood.map { it.timestamp.format(DateTimeFormatter.ofPattern("dd-MM")) },
+                        onDismiss = { onEvent(MoodEvent.HideChart) }
+                    )
+                }
+
+                // Dialog potwierdzający usunięcie
+                if (moodToDelete != null) {
+                    AlertDialog(
+                        onDismissRequest = { moodToDelete = null },
+                        title = { Text(text = "Potwierdź usunięcie") },
+                        text = { Text(text = "Czy na pewno chcesz usunąć ten wpis?") },
+                        confirmButton = {
+                            Button(onClick = {
+                                moodToDelete?.let { onEvent(MoodEvent.DeleteMood(it)) }
+                                moodToDelete = null
+                            }) {
+                                Text("Tak")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = {
+                                moodToDelete = null
+                            }) {
+                                Text("Nie")
+                            }
                         }
-                    },
-                    dismissButton = {
-                        Button(onClick = {
-                            moodToDelete = null
-                        }) {
-                            Text("Nie")
-                        }
+                    )
+                }
+
+                // Dialog dodawania nastroju
+                if (state.isAddingMood) {
+                    AddMoodDialog(state = state, onEvent = onEvent)
+                }
+
+                // Dialog analizy nastroju
+                if (state.isAnalyzingMood) {
+                    if (user != null) {
+                        // Jeśli user != null, wyświetl standardowy dialog
+                        GeminiDialog(
+                            moodHistory = state.mood,
+                            analysisResult = state.analysisResult,
+                            onAnalyze = { selectedMoods, user ->
+                                onEvent(MoodEvent.AnalyzeMood(selectedMoods, user))
+                            },
+                            onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) },
+                            onShake = {
+                                onEvent(MoodEvent.ResetAnalysisResult)
+                            },
+                            userProfile = user
+                        )
+                    } else {
+                        // Jeśli user == null, wyświetl Toast i schowaj dialog
+                        Toast.makeText(
+                            context,
+                            "Uzupełnij dane użytkownika w profilu!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // Aby nie pozostać w stanie wyświetlania dialogu
+                        onEvent(MoodEvent.HideAnalysisDialog)
                     }
-                )
+                }
             }
         }
     )
-
-    // Dialog dodawania nastroju
-    if (state.isAddingMood) {
-        AddMoodDialog(state = state, onEvent = onEvent)
-    }
-
-    if (state.isAnalyzingMood) {
-        if (user != null) {
-            // Jeśli user != null, wyświetl standardowy dialog
-            GeminiDialog(
-                moodHistory = state.mood,
-                analysisResult = state.analysisResult,
-                onAnalyze = { selectedMoods, user ->
-                    onEvent(MoodEvent.AnalyzeMood(selectedMoods, user))
-                },
-                onDismiss = { onEvent(MoodEvent.HideAnalysisDialog) },
-                onShake = {
-                    onEvent(MoodEvent.ResetAnalysisResult)
-                },
-                userProfile = user
-            )
-        } else {
-            // Jeśli user == null, wyświetl Toast i schowaj dialog
-            Toast.makeText(context, "Uzupełnij dane użytkownika w profilu!", Toast.LENGTH_SHORT).show()
-            // Aby nie pozostać w stanie wyświetlania dialogu
-            onEvent(MoodEvent.HideAnalysisDialog)
-        }
-    }
 }

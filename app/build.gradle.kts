@@ -54,6 +54,7 @@ android {
                 "proguard-rules.pro"
             )
         }
+
     }
 
     compileOptions {
@@ -64,10 +65,8 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+   
 
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {
@@ -155,9 +154,10 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
 
     val nav_version = "2.8.5"
-
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
     // add the dependency for the Google AI client SDK for Android
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
 }
