@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
 import java.time.LocalDate
 

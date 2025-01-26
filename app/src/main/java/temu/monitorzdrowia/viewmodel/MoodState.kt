@@ -1,9 +1,9 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
 import com.github.mikephil.charting.data.Entry
-import temu.monitorzdrowia.SortType
-import temu.monitorzdrowia.data.models.Mood
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.SortType
+import temu.monitorzdrowia.model.entities.Mood
+import temu.monitorzdrowia.model.entities.User
 
 // Stan UI dla zarządzania nastrojami w aplikacji
 data class MoodState(

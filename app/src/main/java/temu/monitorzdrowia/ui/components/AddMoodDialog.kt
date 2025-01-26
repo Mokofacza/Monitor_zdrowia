@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import temu.monitorzdrowia.viewmodel.MoodEvent
+import temu.monitorzdrowia.viewmodel.MoodState
 
 // Ten plik zawiera funkcję, która wyświetla dialog umożliwiający użytkownikowi dodanie nowego nastroju.
 // Użytkownik może wpisać notatkę i wybrać ocenę nastroju za pomocą suwaka.

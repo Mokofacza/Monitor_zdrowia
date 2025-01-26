@@ -1,10 +1,10 @@
-package temu.monitorzdrowia.data.local
+package temu.monitorzdrowia.model.data.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import temu.monitorzdrowia.data.models.Mood
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.entities.Mood
+import temu.monitorzdrowia.model.entities.User
 
 // Ten plik definiuje główną klasę bazy danych Room dla aplikacji,
 // która zawiera tabele Mood oraz User, a także konwertery typów niestandardowych.

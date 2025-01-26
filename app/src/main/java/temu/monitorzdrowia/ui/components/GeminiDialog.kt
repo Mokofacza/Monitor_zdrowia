@@ -1,7 +1,5 @@
-// GeminiDialog.kt
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.components
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import temu.monitorzdrowia.data.models.Mood
-import temu.monitorzdrowia.data.models.User
-import temu.monitorzdrowia.ui.build.ShakeDetector
+import temu.monitorzdrowia.model.entities.Mood
+import temu.monitorzdrowia.model.entities.User
+import temu.monitorzdrowia.utils.ShakeDetector
 import kotlin.math.roundToInt
 
 /**

@@ -15,12 +15,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
-import temu.monitorzdrowia.data.local.MoodDatabase
+import temu.monitorzdrowia.model.data.local.MoodDatabase
 import temu.monitorzdrowia.navigation.AppNavGraph
 import temu.monitorzdrowia.ui.components.TopBar
-import temu.monitorzdrowia.ui.build.AddMoodDialog
-import temu.monitorzdrowia.ui.build.MoodViewModel
-import temu.monitorzdrowia.ui.build.ProfileViewModel
+import temu.monitorzdrowia.ui.components.AddMoodDialog
+import temu.monitorzdrowia.viewmodel.MoodViewModel
+import temu.monitorzdrowia.viewmodel.ProfileViewModel
 import temu.monitorzdrowia.ui.theme.MonitorZdrowiaTheme
 
 @Suppress("DEPRECATION")

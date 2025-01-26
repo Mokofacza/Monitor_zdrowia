@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.screens
 
 import android.util.Log
 import android.widget.Toast
@@ -10,6 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
+import temu.monitorzdrowia.viewmodel.ProfileEvent
+import temu.monitorzdrowia.viewmodel.ProfileUiEvent
+import temu.monitorzdrowia.viewmodel.ProfileViewModel
+import temu.monitorzdrowia.ui.components.SexDropdown
+import temu.monitorzdrowia.ui.components.CitySizeDropdown
+import temu.monitorzdrowia.ui.components.DatePickerButton
+import temu.monitorzdrowia.ui.components.EditDialog
 
 @Composable
 fun ProfileScreen(
@@ -79,7 +86,11 @@ fun ProfileScreen(
 
                     CitySizeDropdown(
                         selectedCitySize = state.citySize,
-                        onCitySizeSelected = { cs -> profileViewModel.onEvent(ProfileEvent.SetCitySize(cs)) }
+                        onCitySizeSelected = { cs -> profileViewModel.onEvent(
+                            ProfileEvent.SetCitySize(
+                                cs
+                            )
+                        ) }
                     )
                 }
             },

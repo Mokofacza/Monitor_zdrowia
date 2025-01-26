@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -16,11 +16,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import temu.monitorzdrowia.SortType
+import temu.monitorzdrowia.model.SortType
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.platform.LocalContext
-import temu.monitorzdrowia.data.models.Mood
+import temu.monitorzdrowia.model.entities.Mood
+import temu.monitorzdrowia.viewmodel.MoodState
+import temu.monitorzdrowia.viewmodel.MoodViewModel
+import temu.monitorzdrowia.viewmodel.ProfileViewModel
+import temu.monitorzdrowia.viewmodel.UiEvent
+import temu.monitorzdrowia.ui.components.AddMoodDialog
+import temu.monitorzdrowia.ui.components.GeminiDialog
+import temu.monitorzdrowia.ui.components.MoodChartDialog
+import temu.monitorzdrowia.viewmodel.MoodEvent
 
 
 @Composable

@@ -6,10 +6,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import temu.monitorzdrowia.ui.build.MoodScreen
-import temu.monitorzdrowia.ui.build.MoodViewModel
-import temu.monitorzdrowia.ui.build.ProfileScreen
-import temu.monitorzdrowia.ui.build.ProfileViewModel
+import temu.monitorzdrowia.ui.screens.MoodScreen
+import temu.monitorzdrowia.viewmodel.MoodViewModel
+import temu.monitorzdrowia.ui.screens.ProfileScreen
+import temu.monitorzdrowia.viewmodel.ProfileViewModel
 
 @Composable
 fun AppNavGraph(

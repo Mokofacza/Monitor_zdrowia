@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
 enum class ProfileField(val displayName: String, val genitiveName: String) {
     Name("Imię", "imienia"),

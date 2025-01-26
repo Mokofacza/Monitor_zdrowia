@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data.local
+package temu.monitorzdrowia.model.data.local
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -6,8 +6,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
-import temu.monitorzdrowia.data.models.Mood
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.entities.Mood
+import temu.monitorzdrowia.model.entities.User
 
 // Interfejs MoodDao to nasz Data Access Object (DAO), który definiuje metody do interakcji z bazą danych Room.
 // Dzięki DAO możemy w prosty sposób dodawać, usuwać i pobierać dane z tabeli Mood.

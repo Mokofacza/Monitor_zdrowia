@@ -1,6 +1,4 @@
-// temu.monitorzdrowia.ui.build.MoodViewModel.kt
-
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,9 +8,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import temu.monitorzdrowia.BuildConfig
-import temu.monitorzdrowia.SortType
-import temu.monitorzdrowia.data.local.MoodDao
-import temu.monitorzdrowia.data.models.Mood
+import temu.monitorzdrowia.model.SortType
+import temu.monitorzdrowia.model.data.local.MoodDao
+import temu.monitorzdrowia.model.entities.Mood
 import com.github.mikephil.charting.data.Entry
 
 sealed class UiEvent {

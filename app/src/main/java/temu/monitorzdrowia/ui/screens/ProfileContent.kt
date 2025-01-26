@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.screens
 
 import android.Manifest
 import android.app.Activity
@@ -29,7 +29,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.entities.User
+import temu.monitorzdrowia.viewmodel.ProfileField
+import temu.monitorzdrowia.ui.components.DataRow
 import java.io.ByteArrayOutputStream
 
 @Composable

@@ -1,6 +1,6 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.entities.User
 import java.time.LocalDate
 
 data class ProfileState(

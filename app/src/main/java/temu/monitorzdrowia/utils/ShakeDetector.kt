@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.utils
 
 import android.content.Context
 import android.hardware.Sensor

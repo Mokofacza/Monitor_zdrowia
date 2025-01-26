@@ -1,8 +1,8 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
-import temu.monitorzdrowia.SortType
-import temu.monitorzdrowia.data.models.Mood
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.SortType
+import temu.monitorzdrowia.model.entities.Mood
+import temu.monitorzdrowia.model.entities.User
 
 // Definiuje różne zdarzenia związane z zarządzaniem nastrojami w aplikacji.
 // Te zdarzenia są obsługiwane przez ViewModel do aktualizacji stanu UI.

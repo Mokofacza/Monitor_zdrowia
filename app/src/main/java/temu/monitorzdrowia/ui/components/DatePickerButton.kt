@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.components
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.layout.fillMaxWidth

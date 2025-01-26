@@ -1,10 +1,10 @@
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import temu.monitorzdrowia.data.local.MoodDao
-import temu.monitorzdrowia.data.models.User
+import temu.monitorzdrowia.model.data.local.MoodDao
+import temu.monitorzdrowia.model.entities.User
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

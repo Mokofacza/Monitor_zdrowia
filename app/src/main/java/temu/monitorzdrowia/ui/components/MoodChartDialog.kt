@@ -1,6 +1,4 @@
-// temu.monitorzdrowia.ui.build.MoodChartDialogMP.kt
-
-package temu.monitorzdrowia.ui.build
+package temu.monitorzdrowia.ui.components
 
 import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth

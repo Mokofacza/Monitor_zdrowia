@@ -1,4 +1,4 @@
-package temu.monitorzdrowia.data.models
+package temu.monitorzdrowia.model.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
