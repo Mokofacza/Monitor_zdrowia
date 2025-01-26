@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import temu.monitorzdrowia.data.models.Mood
+import temu.monitorzdrowia.data.models.User
 import temu.monitorzdrowia.ui.build.ShakeDetector
 import kotlin.math.roundToInt
 
@@ -25,18 +26,20 @@ import kotlin.math.roundToInt
  * @param moodHistory Lista wpisów nastroju.
  * @param analysisResult (Opcjonalnie) Wynik analizy, który może być wyświetlony.
  * @param onAnalyze Funkcja uruchamiana po kliknięciu przycisku "Analizuj".
- *                  Wybrana lista wpisów zostanie przekazana do logiki analizy.
+ *                  Wybrana lista wpisów oraz dane użytkownika zostaną przekazane do logiki analizy.
  * @param onDismiss Funkcja wywoływana przy zamknięciu dialogu.
  * @param onShake Funkcja wywoływana przy wykryciu zatrzęsienia telefonu.
+ * @param userProfile Dane profilu użytkownika.
  * @param modifier Opcjonalne modyfikatory.
  */
 @Composable
 fun GeminiDialog(
     moodHistory: List<Mood>,
     analysisResult: String? = null,
-    onAnalyze: (List<Mood>) -> Unit,
+    onAnalyze: (List<Mood>, User) -> Unit,
     onDismiss: () -> Unit,
     onShake: () -> Unit,
+    userProfile: User,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -75,17 +78,6 @@ fun GeminiDialog(
         var selectedCount by remember { mutableStateOf(if (sliderMax >= 3) 3f else sliderMax.toFloat()) }
         // Pobierz najnowsze wpisy na podstawie wybranej liczby
         val selectedMoods = newestFirst.take(selectedCount.toInt())
-
-        // Inicjalizujemy ShakeDetector
-        val shakeDetector = remember { ShakeDetector(onShake) }
-
-        // Rejestrujemy nasłuchiwacz sensorów tylko podczas kompozycji dialogu
-        DisposableEffect(Unit) {
-            shakeDetector.start(context)
-            onDispose {
-                shakeDetector.stop()
-            }
-        }
 
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -140,7 +132,7 @@ fun GeminiDialog(
                 // Przycisk "Analizuj" powinien być aktywny tylko wtedy, gdy nie ma wyniku analizy
                 if (analysisResult == null) {
                     Button(
-                        onClick = { onAnalyze(selectedMoods) }
+                        onClick = { onAnalyze(selectedMoods, userProfile) }
                     ) {
                         Text(text = "Analizuj")
                     }
