@@ -160,4 +160,6 @@ dependencies {
     // add the dependency for the Google AI client SDK for Android
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 }
