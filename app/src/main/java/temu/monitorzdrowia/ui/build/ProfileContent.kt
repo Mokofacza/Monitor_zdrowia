@@ -42,11 +42,11 @@ fun ProfileContent(
     val context = LocalContext.current
     val activity = context as? Activity
 
-    // State for showing dialogs
+
     var showRationale by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
 
-    // Launcher to pick image from gallery
+
     val pickImageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -59,14 +59,12 @@ fun ProfileContent(
                     onPickPhoto(compressedBytes)
                 }
             } catch (e: Exception) {
-                // Handle errors (e.g., show a toast to the user)
                 Toast.makeText(context, "Nie udało się załadować zdjęcia.", Toast.LENGTH_SHORT).show()
                 Log.e("ProfileContent", "Error loading image: ${e.message}", e)
             }
         }
     }
 
-    // Launcher to request permission
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -77,20 +75,18 @@ fun ProfileContent(
         } else {
             Log.d("ProfileContent", "Uprawnienie do odczytu zdjęć odrzucone")
             Toast.makeText(context, "Uprawnienie odrzucone", Toast.LENGTH_SHORT).show()
-            // Check if user selected "Don't ask again"
             val permissionToRequest = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 Manifest.permission.READ_MEDIA_IMAGES
             } else {
                 Manifest.permission.READ_EXTERNAL_STORAGE
             }
             if (activity != null && !ActivityCompat.shouldShowRequestPermissionRationale(activity, permissionToRequest)) {
-                // User selected "Don't ask again"
                 showSettingsDialog = true
             }
         }
     }
 
-    // Function to check if permission is granted
+
     fun hasReadImagesPermission(): Boolean {
         return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED
@@ -99,7 +95,7 @@ fun ProfileContent(
         }
     }
 
-    // Function to request the appropriate permission
+
     fun requestReadImagesPermission() {
         val permissionToRequest = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES
@@ -109,7 +105,7 @@ fun ProfileContent(
         permissionLauncher.launch(permissionToRequest)
     }
 
-    // Handle click on profile image/icon
+    // obsługa wyboru zdjęcia
     val onClickProfileImage: () -> Unit = {
         if (hasReadImagesPermission()) {
             pickImageLauncher.launch("image/*")
@@ -121,16 +117,14 @@ fun ProfileContent(
             }
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity!!, permissionToRequest)) {
-                // Show rationale dialog
                 showRationale = true
             } else {
-                // Directly request permission
+                // zapytanie odnośnie uprawnień aplikacji
                 requestReadImagesPermission()
             }
         }
     }
 
-    // Rationale dialog
     if (showRationale) {
         AlertDialog(
             onDismissRequest = { showRationale = false },
@@ -152,7 +146,7 @@ fun ProfileContent(
         )
     }
 
-    // Settings dialog
+    // Udostępnianie uprawnień dla aplikacji
     if (showSettingsDialog) {
         AlertDialog(
             onDismissRequest = { showSettingsDialog = false },
@@ -178,7 +172,7 @@ fun ProfileContent(
         )
     }
 
-    // UI Twojej aplikacji
+    // UI aplikacji
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(8.dp),
@@ -244,7 +238,7 @@ fun ProfileContent(
                 onEditClick = { onEditField(ProfileField.BirthDate) }
             )
 
-            // Age – no edit
+            // wiek – automatyczny
             age?.let {
                 DataRow(
                     label = "Wiek:",

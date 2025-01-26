@@ -1,5 +1,6 @@
 package temu.monitorzdrowia.ui.build
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -24,15 +25,13 @@ fun ProfileScreen(
                 is ProfileUiEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
-                // Możesz obsłużyć więcej zdarzeń w przyszłości
             }
         }
     }
 
     // Debugging: Log when dialog visibility changes
     LaunchedEffect(state.isDialogVisible) {
-        // Możesz usunąć ten blok, jeśli nie potrzebujesz logów
-        // Log.d("ProfileScreen", "Dialog is visible: ${state.isDialogVisible}")
+        Log.d("ProfileScreen", "Dialog is visible: ${state.isDialogVisible}")
     }
 
     // 1. Dialog do tworzenia profilu (jeżeli user == null i nie anulowano)
@@ -133,7 +132,7 @@ fun ProfileScreen(
                 onEditField = { field -> profileViewModel.onEvent(ProfileEvent.StartEdit(field)) }
             )
         }
-    } else if (!state.hasCancelled) { // Opcjonalnie: Pokazuj komunikat tylko, jeśli nie anulowano
+    } else if (!state.hasCancelled) {
         Text(
             text = "Brak użytkownika. Wypełnij dane w wyświetlonym oknie dialogowym.",
             modifier = Modifier.padding(16.dp)

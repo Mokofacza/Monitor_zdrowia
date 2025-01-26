@@ -23,7 +23,7 @@ fun EditDialog(
 
     AlertDialog(
         onDismissRequest = { onEvent(ProfileEvent.CancelEdit) },
-        title = { Text("Edycja ${field.genitiveName}") }, // Używamy genitiveName
+        title = { Text("Edycja ${field.genitiveName}") },
         text = {
             Column {
                 when (field) {

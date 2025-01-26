@@ -66,7 +66,14 @@ class ProfileViewModel(
                 _state.update { it.copy(subname = event.subname) }
             }
             is ProfileEvent.SetBirthDate -> {
-                _state.update { it.copy(birthDate = event.birthDate) }
+                // Walidacja daty
+                if (event.birthDate.isAfter(LocalDate.now())) {
+                    viewModelScope.launch {
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Data urodzenia nie może być w przyszłości"))
+                    }
+                } else {
+                    _state.update { it.copy(birthDate = event.birthDate) }
+                }
             }
             is ProfileEvent.SetSex -> {
                 _state.update { it.copy(sex = event.sex) }
@@ -123,6 +130,14 @@ class ProfileViewModel(
                         s.citySize.isNotBlank()
 
                 if (canSave) {
+                    // Dodatkowa walidacja daty urodzenia
+                    if (s.birthDate!!.isAfter(LocalDate.now())) {
+                        viewModelScope.launch {
+                            _uiEvent.send(ProfileUiEvent.ShowToast("Data urodzenia nie może być w przyszłości"))
+                        }
+                        return
+                    }
+
                     viewModelScope.launch {
                         try {
                             dao.insertUser(
@@ -201,19 +216,19 @@ class ProfileViewModel(
                             tempDate = null
                         )
                     }
-                    ProfileField.Address -> _state.update {
-                        it.copy(
-                            isEditDialogVisible = true,
-                            fieldBeingEdited = ProfileField.Address,
-                            tempValue = user.address.toString(),
-                            tempDate = null
-                        )
-                    }
                     ProfileField.CitySize -> _state.update {
                         it.copy(
                             isEditDialogVisible = true,
                             fieldBeingEdited = ProfileField.CitySize,
                             tempValue = user.citySize.toString(),
+                            tempDate = null
+                        )
+                    }
+                    ProfileField.Address -> _state.update {
+                        it.copy(
+                            isEditDialogVisible = true,
+                            fieldBeingEdited = ProfileField.Address,
+                            tempValue = user.address.toString(),
                             tempDate = null
                         )
                     }
@@ -224,7 +239,14 @@ class ProfileViewModel(
                 _state.update { it.copy(tempValue = event.value) }
             }
             is ProfileEvent.ChangeEditDate -> {
-                _state.update { it.copy(tempDate = event.date) }
+                // Walidacja daty dla edycji
+                if (event.date.isAfter(LocalDate.now())) {
+                    viewModelScope.launch {
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Data urodzenia nie może być w przyszłości"))
+                    }
+                } else {
+                    _state.update { it.copy(tempDate = event.date) }
+                }
             }
             is ProfileEvent.ConfirmEdit -> {
                 val user = _state.value.user ?: return
@@ -232,13 +254,21 @@ class ProfileViewModel(
                 val tmpVal = _state.value.tempValue
                 val tmpDate = _state.value.tempDate
 
+                // Dodatkowa walidacja, jeśli edytujemy datę urodzenia
+                if (field == ProfileField.BirthDate && tmpDate != null && tmpDate.isAfter(LocalDate.now())) {
+                    viewModelScope.launch {
+                        _uiEvent.send(ProfileUiEvent.ShowToast("Data urodzenia nie może być w przyszłości"))
+                    }
+                    return
+                }
+
                 val updatedUser = when (field) {
                     ProfileField.Name -> user.copy(name = tmpVal)
                     ProfileField.Subname -> user.copy(subname = tmpVal)
                     ProfileField.BirthDate -> tmpDate?.let { user.copy(birthDate = it) } ?: user
                     ProfileField.Sex -> user.copy(sex = tmpVal)
-                    ProfileField.Address -> user.copy(address = tmpVal)
                     ProfileField.CitySize -> user.copy(citySize = tmpVal)
+                    ProfileField.Address -> user.copy(address = tmpVal)
                 }
 
                 // Zapis w bazie danych

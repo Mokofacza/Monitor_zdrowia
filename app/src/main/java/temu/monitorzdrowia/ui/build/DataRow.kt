@@ -3,6 +3,7 @@ package temu.monitorzdrowia.ui.build
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,22 +37,34 @@ fun DataRow(
         // Rozszerzający się odstęp – pcha kropki w prawo
         Spacer(modifier = Modifier.weight(1f))
 
-        // 3 kropki – tylko jeśli onEditClick != null
+        // Ikona trzech kropek – tylko jeśli onEditClick != null
         if (onEditClick != null) {
-            IconButton(onClick = { menuExpanded = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Menu")
-            }
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false }
+            Box(
+                contentAlignment = Alignment.TopEnd,
+                modifier = Modifier.wrapContentSize(Alignment.TopEnd)
             ) {
-                DropdownMenuItem(
-                    text = { Text("Edytuj") },
-                    onClick = {
-                        menuExpanded = false
-                        onEditClick()
-                    }
-                )
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Menu"
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                    modifier = Modifier.wrapContentWidth(Alignment.End)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Edytuj") },
+                        onClick = {
+                            menuExpanded = false
+                            onEditClick()
+                        },
+                        leadingIcon = {
+                            Icon(Icons.Default.Edit, contentDescription = "Edytuj")
+                        }
+                    )
+                }
             }
         }
     }

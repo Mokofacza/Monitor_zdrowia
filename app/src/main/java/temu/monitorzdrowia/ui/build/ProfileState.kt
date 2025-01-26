@@ -14,11 +14,9 @@ data class ProfileState(
     val isDialogVisible: Boolean = false,
     val age: Int? = null,
     val hasCancelled: Boolean = false,
-    val showMissingDataMessage: Boolean = false, // Nowa flaga
-
-    // Nowe pola do "edycji jednego elementu"
+    val showMissingDataMessage: Boolean = false,
     val isEditDialogVisible: Boolean = false,
     val fieldBeingEdited: ProfileField? = null,
-    val tempValue: String = "",     // Tekst tymczasowy (np. dla name, subname, sex, address, citySize)
-    val tempDate: LocalDate? = null // Tymczasowa data (dla birthDate)
+    val tempValue: String = "",
+    val tempDate: LocalDate? = null
 )
