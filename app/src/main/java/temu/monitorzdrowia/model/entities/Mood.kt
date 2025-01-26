@@ -4,10 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 
-// Ten plik jest odpowiedzialny za opisanie pojedynczego wpisu nastroju w bazie danych.
-// To właśnie tu definiujemy, jakie informacje zapisujemy, gdy chcemy przechować nasz nastrój.
 
-@Entity // Mówi Roomowi, że ta klasa to tabela w bazie
+@Entity
 data class Mood(
     val moodRating: Int, //od 1 do 10
     val note: String,

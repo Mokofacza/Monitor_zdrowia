@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-// Konwertery typów
 
 object Converters {
 
@@ -15,7 +14,7 @@ object Converters {
     // Konwerter z LocalDateTime na String
     @TypeConverter
     fun fromLocalDateTime(dateTime: LocalDateTime?): String? {
-        return dateTime?.format(formatter) // Konwertuje LocalDateTime na sformatowany String
+        return dateTime?.format(formatter)
     }
 
     // Konwerter ze String na LocalDateTime

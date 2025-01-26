@@ -9,10 +9,10 @@ import temu.monitorzdrowia.model.entities.User
 // Ten plik definiuje główną klasę bazy danych Room dla aplikacji,
 // która zawiera tabele Mood oraz User, a także konwertery typów niestandardowych.
 @Database(
-    entities = [Mood::class, User::class], // Poprawione dodanie klasy User jako drugiej tabeli
+    entities = [Mood::class, User::class],
     version = 1,
 )
-@TypeConverters(Converters::class) // Informuje Room o niestandardowych konwerterach typów
+@TypeConverters(Converters::class)
 abstract class MoodDatabase : RoomDatabase() {
-    abstract val dao: MoodDao // Abstrakcyjna właściwość DAO dla Mood
+    abstract val dao: MoodDao
 }

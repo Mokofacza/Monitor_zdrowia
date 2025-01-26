@@ -12,9 +12,9 @@ data class MoodState(
     val note: String = "",                       // Aktualna notatka do nastroju
     val isAddingMood: Boolean = false,           // Flaga określająca, czy dialog dodawania nastroju jest widoczny
     val isAnalyzingMood: Boolean = false,        // Flaga określająca, czy dialog analizy nastroju jest widoczny
-    val analysisResult: String? = null,          // Opcjonalny wynik analizy nastroju
+    val analysisResult: String? = null,          // Wynik analizy nastroju
     val sortType: SortType = SortType.TIME,       // Aktualny typ sortowania nastrojów
-    val user: User? = null, // Pole przechowujące dane użytkownika
+    val user: User? = null,                         // Pole przechowujące dane użytkownika
     val isChartVisible: Boolean = false,
     val moodEntries: List<Entry> = emptyList(),
 )

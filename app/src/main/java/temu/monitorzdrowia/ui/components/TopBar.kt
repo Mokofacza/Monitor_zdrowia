@@ -10,6 +10,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 
+/**
+ * Górny pasek aplikacji (TopBar) z ikonami nawigacyjnymi do ekranu nastrojów i profilu użytkownika.
+ *
+ * @param navController Kontroler nawigacji do zarządzania przejściami między ekranami.
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(navController: NavController) {
@@ -38,7 +44,7 @@ fun TopBar(navController: NavController) {
                     tint = if (currentRoute == NavRoutes.Mood.route) {
                         MaterialTheme.colorScheme.onPrimary
                     } else {
-                        // Używamy koloru z motywu z obniżoną przezroczystością dla nieaktywnej ikony
+                        // kolor motywu z obniżoną przezroczystością dla nieaktywnej ikony
                         MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                     }
                 )

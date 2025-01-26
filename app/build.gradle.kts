@@ -26,8 +26,8 @@ android {
 
     defaultConfig {
         applicationId = "temu.monitorzdrowia"
-        minSdk = 29
-        targetSdk = 34
+        minSdk = 29 //android 10
+        targetSdk = 34 // 14
         versionCode = 1
         versionName = "1.0"
 
@@ -39,7 +39,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7" // Upewnij się, że wersja jest aktualna
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
 
     buildTypes {

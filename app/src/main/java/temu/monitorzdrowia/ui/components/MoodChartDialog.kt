@@ -95,7 +95,7 @@ fun MoodChartDialog(
                         setBackgroundColor(Color.TRANSPARENT)
                         invalidate() // Odświeżenie wykresu
 
-                        // Opcjonalnie: Dodanie animacji
+                        // Dodanie animacji
                         animateX(1000) // Animacja w osi X trwająca 1 sekundę
                         animateY(1000) // Animacja w osi Y trwająca 1 sekundę
                     }

@@ -30,6 +30,16 @@ import temu.monitorzdrowia.ui.components.GeminiDialog
 import temu.monitorzdrowia.ui.components.MoodChartDialog
 import temu.monitorzdrowia.viewmodel.MoodEvent
 
+/**
+ * Ekran wyświetlający listę nastrojów użytkownika, umożliwiający dodawanie, sortowanie,
+ * analizowanie oraz wyświetlanie wykresów nastrojów.
+ *
+ * @param state Aktualny stan UI związany z nastrojami.
+ * @param onEvent Funkcja do obsługi zdarzeń generowanych przez ekran.
+ * @param viewModel ViewModel zarządzający logiką nastrojów.
+ * @param profileViewModel ViewModel zarządzający logiką profilu użytkownika.
+ */
+
 
 @Composable
 fun MoodScreen(
@@ -280,7 +290,6 @@ fun MoodScreen(
                             "Uzupełnij dane użytkownika w profilu!",
                             Toast.LENGTH_SHORT
                         ).show()
-                        // Aby nie pozostać w stanie wyświetlania dialogu
                         onEvent(MoodEvent.HideAnalysisDialog)
                     }
                 }

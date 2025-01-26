@@ -23,6 +23,11 @@ import temu.monitorzdrowia.viewmodel.MoodViewModel
 import temu.monitorzdrowia.viewmodel.ProfileViewModel
 import temu.monitorzdrowia.ui.theme.MonitorZdrowiaTheme
 
+/**
+ * Główna aktywność aplikacji, która ustawia zawartość interfejsu użytkownika
+ * oraz inicjalizuje ViewModel-e i bazę danych.
+ */
+
 @Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
     private val db by lazy {

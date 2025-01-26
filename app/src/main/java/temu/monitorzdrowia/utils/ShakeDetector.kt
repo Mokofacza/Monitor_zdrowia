@@ -7,16 +7,21 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import kotlin.math.sqrt
 
+/**
+ * Klasa detekcji zatrzęsienia urządzenia (Shake Detector) wykorzystująca akcelerometr.
+ *
+ * @param onShake Funkcja callback wywoływana po wykryciu zatrzęsienia.
+ */
+
 class ShakeDetector(private val onShake: () -> Unit) : SensorEventListener {
 
     private var sensorManager: SensorManager? = null
     private var accelerometer: Sensor? = null
 
-    // Czułość detekcji (im wyższa, tym trudniej wykryć zatrzęsienie)
-    private val shakeThreshold = 6f
+    private val shakeThreshold = 6f// Czułość detekcji
     private var shakeCount = 0
     private var lastShakeTime = 0L
-    private val shakeTimeout = 1000 // 1 sekunda
+    private val shakeTimeout = 1000
 
     fun start(context: Context) {
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

@@ -161,6 +161,6 @@ class MoodViewModel(
 
     private val generativeModel = GenerativeModel(
         modelName = "gemini-1.5-flash",
-        apiKey = BuildConfig.API_KEY // Upewnij się, że klucz jest poprawny
+        apiKey = BuildConfig.API_KEY
     )
 }

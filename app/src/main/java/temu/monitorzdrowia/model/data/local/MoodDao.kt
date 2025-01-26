@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import temu.monitorzdrowia.model.entities.Mood
 import temu.monitorzdrowia.model.entities.User
 
-// Interfejs MoodDao to nasz Data Access Object (DAO), który definiuje metody do interakcji z bazą danych Room.
-// Dzięki DAO możemy w prosty sposób dodawać, usuwać i pobierać dane z tabeli Mood.
 @Dao
 interface MoodDao {
 
@@ -20,19 +18,19 @@ interface MoodDao {
     @Delete
     suspend fun deleteMood(mood: Mood)
 
-    // Sortowanie po dacie od najnowszej do najstarszej (malejąco)
+    // Sortowanie po dacie malejąco
     @Query("SELECT * FROM Mood ORDER BY timestamp DESC")
     fun orderByDateDescending(): Flow<List<Mood>>
 
-    // Sortowanie po dacie od najstarszej do najnowszej (rosnąco)
+    // Sortowanie po dacie rosnąco
     @Query("SELECT * FROM Mood ORDER BY timestamp ASC")
     fun orderByDateAscending(): Flow<List<Mood>>
 
-    // Sortowanie po ocenie od najwyższej do najniższej (malejąco)
+    // Sortowanie po ocenie malejąco
     @Query("SELECT * FROM Mood ORDER BY MoodRating DESC")
     fun orderByRatingDescending(): Flow<List<Mood>>
 
-    // Sortowanie po ocenie od najniższej do najwyższej (rosnąco)
+    // Sortowanie po ocenie rosnąco
     @Query("SELECT * FROM Mood ORDER BY MoodRating ASC")
     fun orderByRatingAscending(): Flow<List<Mood>>
 
@@ -40,11 +38,9 @@ interface MoodDao {
 
     @Insert
     suspend fun insertUser(user: User)
-    // suspend umożliwia wykonywanie tej operacji w tle.
 
     @Update
     suspend fun updateUser(user: User)
-
 
     @Delete
     suspend fun deleteUser(user: User)

@@ -1,4 +1,3 @@
-// NavGraph.kt
 package temu.monitorzdrowia.navigation
 
 import androidx.compose.runtime.Composable
@@ -23,7 +22,7 @@ fun AppNavGraph(
                 state = viewModel.state.collectAsState().value,
                 onEvent = viewModel::onEvent,
                 viewModel = viewModel,
-                profileViewModel = profileViewModel // Dodanie ProfileViewModel
+                profileViewModel = profileViewModel
             )
         }
         composable(NavRoutes.Profile.route) {

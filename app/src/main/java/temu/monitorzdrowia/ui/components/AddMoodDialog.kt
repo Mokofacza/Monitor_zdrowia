@@ -18,56 +18,59 @@ import androidx.compose.ui.unit.sp
 import temu.monitorzdrowia.viewmodel.MoodEvent
 import temu.monitorzdrowia.viewmodel.MoodState
 
-// Ten plik zawiera funkcję, która wyświetla dialog umożliwiający użytkownikowi dodanie nowego nastroju.
-// Użytkownik może wpisać notatkę i wybrać ocenę nastroju za pomocą suwaka.
+/**
+ * Dialog umożliwiający użytkownikowi dodanie nowego nastroju.
+ *
+ * @param state Aktualny stan UI związany z nastrojami.
+ * @param onEvent Funkcja do obsługi zdarzeń generowanych przez dialog (np. zapisywanie nastroju, ukrywanie dialogu).
+ * @param modifier Opcjonalny modyfikator do dostosowania wyglądu dialogu.
+ */
 
 @Composable
 fun AddMoodDialog(
-    state: MoodState, // Aktualny stan UI aplikacji
+    state: MoodState,
     onEvent: (MoodEvent) -> Unit, // Funkcja do obsługi zdarzeń z dialogu
     modifier: Modifier = Modifier
 ) {
     AlertDialog(
         onDismissRequest = {
-            onEvent(MoodEvent.HideDialog) // Ukryj dialog, gdy użytkownik go odrzuci
+            onEvent(MoodEvent.HideDialog) // Ukryj dialog
         },
-        title = { Text(text = "Dodaj Nastrój") }, // Tytuł dialogu
+        title = { Text(text = "Dodaj Nastrój") },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth() // Rozciągnięcie kolumny na pełną szerokość
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // Pole tekstowe do wpisania opisu nastroju
                 TextField(
                     value = state.note,
                     onValueChange = {
-                        onEvent(MoodEvent.SetNote(it)) // Aktualizuj notatkę w stanie
+                        onEvent(MoodEvent.SetNote(it))
                     },
                     placeholder = {
                         Text(text = "Opis nastroju")
                     },
-                    modifier = Modifier.fillMaxWidth() // Rozciągnięcie pola na pełną szerokość
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 // Suwak do wyboru oceny nastroju
                 Slider(
                     value = state.moodRating.toFloat(),
                     onValueChange = { newValue ->
-                        onEvent(MoodEvent.SetRating(newValue.toInt())) // Aktualizuj ocenę w stanie
+                        onEvent(MoodEvent.SetRating(newValue.toInt()))
                     },
-                    valueRange = 1f..10f, // Zakres wartości suwaka od 1 do 10
+                    valueRange = 1f..10f, // Zakres
                     steps = 8,
-                    modifier = Modifier.padding(vertical = 16.dp) // Dodanie odstępów pionowych
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
 
-                // Wyświetlanie aktualnej wybranej oceny
                 Row(
-                    verticalAlignment = Alignment.CenterVertically, // Wyrównanie pionowe elementów
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Ocena: ${state.moodRating}", // Tekst pokazujący aktualną ocenę
+                        text = "Ocena: ${state.moodRating}",
                         fontSize = 16.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -77,7 +80,7 @@ fun AddMoodDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onEvent(MoodEvent.SaveRating) // Zapisz nowy nastrój
+                    onEvent(MoodEvent.SaveRating)
                 }
             ) {
                 Text(text = "Zapisz")
@@ -86,12 +89,12 @@ fun AddMoodDialog(
         dismissButton = {
             Button(
                 onClick = {
-                    onEvent(MoodEvent.HideDialog) // Anuluj dodawanie nastroju
+                    onEvent(MoodEvent.HideDialog)
                 }
             ) {
                 Text(text = "Anuluj")
             }
         },
-        modifier = modifier // Dodatkowe modyfikatory, jeśli są przekazane
+        modifier = modifier
     )
 }
