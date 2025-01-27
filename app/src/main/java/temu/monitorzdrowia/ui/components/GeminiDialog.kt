@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Slider
@@ -67,9 +69,9 @@ fun GeminiDialog(
         )
     } else {
         // Jeśli są wpisy, wyświetlamy standardowy dialog analizy nastroju
-        // Posortuj listę tak, aby najnowsze wpisy były na początku
+        // najnowsze wpisy na początku
         val newestFirst = moodHistory.sortedByDescending { it.timestamp }
-        // Upewnij się, że suwak nie przekracza 5, nawet jeśli lista ma więcej wpisów
+
         val sliderMax = newestFirst.size.coerceAtMost(5)
 
         // Domyślnie wybieramy np. 3 wpisy lub liczbę wpisów, jeśli jest ich mniej
@@ -83,7 +85,9 @@ fun GeminiDialog(
             text = {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
                 ) {
                     if (analysisResult == null) {
                         if (sliderMax > 1) {

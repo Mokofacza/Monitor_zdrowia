@@ -142,7 +142,7 @@ class MoodViewModel(
 
                     val prompt = """
                         Przeanalizuj poniższe opisy nastroju, są one podane od najnowszych i daj mi radę.
-                        są to wpisy odnośnie nastroju pacjenta. chce byś odpowiedział w maksymalnie 10 zdaniach.
+                        są to wpisy odnośnie nastroju pacjenta. chce byś odpowiedział w maksymalnie 20 zdaniach.
                         wciel sie w role jego lekarza:
                         
                         Dane użytkownika:
