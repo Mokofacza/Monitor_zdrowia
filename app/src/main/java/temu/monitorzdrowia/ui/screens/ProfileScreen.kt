@@ -41,7 +41,7 @@ fun ProfileScreen(
         Log.d("ProfileScreen", "Dialog is visible: ${state.isDialogVisible}")
     }
 
-    // 1. Dialog do tworzenia profilu (jeżeli user == null i nie anulowano)
+    // Dialog do tworzenia profilu (jeżeli user == null i nie anulowano)
     if (state.isDialogVisible) {
         AlertDialog(
             onDismissRequest = { profileViewModel.onEvent(ProfileEvent.HideFillDataDialog) },

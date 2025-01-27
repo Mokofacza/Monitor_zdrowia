@@ -44,7 +44,6 @@ fun GeminiDialog(
 ) {
     val context = LocalContext.current
 
-    // Inicjalizujemy ShakeDetector i przekazujemy callback onShake
     val shakeDetector = remember { ShakeDetector(onShake) }
 
     DisposableEffect(Unit) {
